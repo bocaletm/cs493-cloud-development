@@ -1,4 +1,5 @@
 import datetime
+import os
 from flask import Flask, render_template, request, redirect, url_for
 from google.cloud import datastore
 from google.auth.transport import requests
@@ -6,6 +7,8 @@ import google.oauth2.id_token
 
 
 datastore_client = datastore.Client()
+
+keyFromEnv = os.environ.get("FIREBASE_API_KEY")
 
 def store_todo(title,checked,email):
     entity = datastore.Entity(key=datastore_client.key('User',email,'todo'))

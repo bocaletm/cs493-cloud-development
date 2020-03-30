@@ -1,4 +1,6 @@
 runtime: python37
+env_variables:
+  FIREBASE_API_KEY: $FIREBASE_API_KEY
 
 handlers:
   # This configures Google App Engine to serve the files in the app's static
