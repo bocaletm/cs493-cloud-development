@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+<head>
+  <title>Datastore and Firebase Auth Example</title>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.css" />
+</head>
+<body>   
+  <div id="login-info" hidden=true>
+    <dl class="inline-flex">
+      <dt><button id="sign-out" hidden=true>Sign Out</button></dt><dd></dd>
+    {% if user_data %}  
+      <dt>Name:</dt><dd>{{ user_data['name'] }}</dd>
+      <dt>Email:</dt><dd>{{ user_data['email'] }}</dd>
+      <dt>Last visit:</dt>
+        {% for time in times %}
+          <dd>{{ time['timestamp'] }}</dd>
+        {% endfor %} 
+    {% elif error_message %}    
+      <dt>Error:</dt> <dd>{{ error_message }}</dd>
+    {% endif %}
+    </dl>
+  </div>
+
+
+  <div id="data" hidden=true>
+    {% if user_data %} 
+    <h2>{{ user_data['name'] }}'s List</h2>
+    <h3>Add a To-Do to your list:</h3>
+    <form action="{{ url_for('addtodo') }}" method="POST"> 
+        <input type="text" name="todo"> 
+        <input type="submit" value="Add" class="button"> 
+    </form> 
+    <h3>Todos:</h3>
+      {% for todo in todos %}      
+      <form action="{{ url_for('deletetodo') }}" method="POST">     
+        <input type="checkbox" id="{{ todo['title'] }}" name="checked" onclick="window.location.href='{{ url_for('toggletodo', title=todo['title'], checked=todo['checked']) }}';" {% if todo['checked'] == True %}checked{% endif %}>
+        <label for="{{ todo['title'] }}">{{ todo['title'] }}</label>
+        <input type="text" hidden="true" name="todo" value="{{ todo['title'] }}">
+        <input type="submit" value="x" class="button"> 
+      </form> 
+      </br>
+      {% endfor %}     
+    {% endif %}
+  </div>
+
+  
+  <div id="firebaseui-auth-container"></div>
+  
+
+<!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/7.11.0/firebase-app.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/7.8.0/firebase-auth.js"></script>
+ 
+<script src="https://www.gstatic.com/firebasejs/7.11.0/firebase-analytics.js"></script>
+
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: os.environ.get("FIREBASE_API_KEY"),
+    authDomain: "python-example-mario.firebaseapp.com",
+    databaseURL: "https://python-example-mario.firebaseio.com",
+    projectId: "python-example-mario",
+    storageBucket: "python-example-mario.appspot.com",
+    messagingSenderId: "642231390721",
+    appId: "1:642231390721:web:fd4840964a503b7149a600",
+    measurementId: "G-M5MG99Y4ZX"
+  };
+  
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  firebase.analytics();
+</script>
+
+</body>
+</html>
