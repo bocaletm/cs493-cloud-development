@@ -10,14 +10,31 @@ import google.oauth2.id_token
 datastore_client = datastore.Client()
 
 NO_ID = 'No boat with this boat_id exists'
+NO_SLIP_OR_BOAT = 'The specified boat and/or slip don’t exist'
+SLIP_OCCUPIED = 'The slip is not empty'
+ALREADY_DOCKED = 'Boat already docked at Slip '
+DOCKING_NOT_FOUND = 'No boat with this boat_id is at the slip with this slip_id'
 INCOMPLETE = 'The request object is missing at least one of the required attributes'
 DOCUMENTATION = 'https://canvas.oregonstate.edu/courses/1764544/files/79296197/download'
 
 def errorResponse(status,msg):
     return Response(json.dumps({'Error': msg}, sort_keys=True, indent=4),status, mimetype='application/json')
 
+def codeResponse(status):
+    return Response(status=status,mimetype='application/json')
+
 def contentResponse(status,content):
     return Response(json.dumps(content, sort_keys=True, indent=4),status=status, mimetype='application/json')
+
+def boat_is_docked(boat_id):
+    query = datastore_client.query(kind='Slip')
+    query.add_filter('current_boat', '=', boat_id)
+    query.keys_only()
+    slips = query.fetch()
+    for slip in slips:
+        return slip.key.id_or_name
+    return None
+
 
 def store_boat(name, boatType, length):
     kind = 'Boat'
@@ -70,11 +87,9 @@ def update_boat(baseUri, boat_id, name, boatType, length):
         id = boat.key.id_or_name
         selfUri = baseUri + str(id)
         boat.update({
-            "id": id,
             "name": name, 
             "type": boatType, 
             "length": length,
-            "self": selfUri
         })
         datastore_client.put(boat)
         boat.update({
@@ -120,17 +135,66 @@ def get_slips(baseUri):
         slip.update({"self":selfUri})
     return slips
 
-def get_slip(slip_id):
-    return 200
+def get_slip(slip_id, baseUri):
+    query = datastore_client.query(kind='Slip')
+    slip_key = datastore_client.key('Slip', int(slip_id))
+    query.key_filter(slip_key)
+    slips = query.fetch()
+    for slip in slips:
+        id = slip.key.id_or_name
+        selfUri = baseUri + str(id)
+        slip.update({"id":id})
+        slip.update({"self":selfUri})
+        return slip
 
 def delete_slip(slip_id):
-    return 200
+    slip_key = datastore_client.key('Slip', int(slip_id))
+    if datastore_client.get(slip_key) is not None:
+        datastore_client.delete(slip_key)
+        return 204
+    else:
+        return 404
 
 def dock_boat(slip_id, boat_id):
-    return 200
+    dockedSlip = boat_is_docked(boat_id)
+    if dockedSlip != None:
+        return errorResponse(403, ALREADY_DOCKED + str(dockedSlip))
+    boat_key = datastore_client.key('Boat', int(boat_id))
+    slip_key = datastore_client.key('Slip', int(slip_id))
+    if datastore_client.get(boat_key) is None or datastore_client.get(slip_key) is None:
+        return errorResponse(404, NO_SLIP_OR_BOAT)
+    query = datastore_client.query(kind='Slip')
+    query.key_filter(slip_key)
+    slips = query.fetch()
+    for slip in slips:
+        if slip.get('current_boat',None) != None:
+            return errorResponse(403, SLIP_OCCUPIED)
+        slip.update({
+            "current_boat": boat_id
+        })
+        datastore_client.put(slip)
+        return codeResponse(204)
 
 def release_boat(slip_id, boat_id):
-    return 200
+    dockedSlip = boat_is_docked(boat_id)
+    boat_key = datastore_client.key('Boat', int(boat_id))
+    slip_key = datastore_client.key('Slip', int(slip_id))
+    if dockedSlip == None or int(dockedSlip) != int(slip_id) or datastore_client.get(boat_key) is None or datastore_client.get(slip_key) is None:
+        print(dockedSlip)
+        print(slip_id)
+        print(datastore_client.get(boat_key))
+        print(datastore_client.get(slip_key))
+        return errorResponse(404, DOCKING_NOT_FOUND)
+
+    query = datastore_client.query(kind='Slip')
+    query.key_filter(slip_key)
+    slips = query.fetch()
+    for slip in slips:
+        slip.update({
+            "current_boat": None
+        })
+        datastore_client.put(slip)
+        return codeResponse(204)
 
 app = Flask(__name__)
 
@@ -159,7 +223,6 @@ def getBoats():
 
 @app.route('/boats/<string:boat_id>', methods =['GET']) 
 def getBoat(boat_id):
-    boat = None
     boat = get_boat(boat_id, request.base_url) 
     if boat is not None:
         print(boat)
@@ -183,7 +246,7 @@ def updateBoat(boat_id):
 def deleteBoat(boat_id):
     status = delete_boat(boat_id) 
     if status == 204:
-        return Response(status=status, mimetype='application/json')
+        return codeResponse(status)
     else:
         return errorResponse(status,NO_ID)
 
@@ -212,28 +275,34 @@ def getSlips():
 
 @app.route('/slips/<string:slip_id>', methods =['GET']) 
 def getSlip(slip_id):
-    status = get_slip(slip_id) 
-    return Response(status=status, mimetype='application/json')
+    slip = get_slip(slip_id, request.base_url) 
+    if slip is not None:
+        print(slip)
+        return make_response(jsonify(slip), 200)
+    else: 
+        return errorResponse(404,NO_ID)
 
 @app.route('/slips/<string:slip_id>', methods =['DELETE']) 
 def deleteSlip(slip_id):
     status = delete_slip(slip_id) 
-    return Response(status=status, mimetype='application/json')
+    if status == 204:
+        return codeResponse(status)
+    else:
+        return errorResponse(status,NO_ID)
 
 @app.route('/slips/<string:slip_id>/<string:boat_id>', methods =['PUT']) 
-def dockBoat(slip_id,boat_id):
-    status = dock_boat(slip_id,boat_id) 
-    return Response(status=status, mimetype='application/json')
+def dockBoat(slip_id, boat_id):
+    response = dock_boat(slip_id, boat_id) 
+    return response
 
-@app.route('/slips/<string:slip_id>/<string:boat_id>', methods =['PATCH']) 
+@app.route('/slips/<string:slip_id>/<string:boat_id>', methods =['DELETE']) 
 def releaseBoat(slip_id,boat_id):
-    status = release_boat(slip_id,boat_id) 
-    return Response(status=status, mimetype='application/json')
+    response = release_boat(slip_id,boat_id) 
+    return response
 
 @app.route('/')
 def root():
     return Response("{'documentation_uri': " + DOCUMENTATION + " }\n", status=200, mimetype='application/json')
-    
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True)
