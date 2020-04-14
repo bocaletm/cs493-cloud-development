@@ -31,13 +31,18 @@ def store_boat(name, boatType, length):
         return -1
     return boat.key.id_or_name
 
-def get_boats():
+def get_boats(baseUri):
     query = datastore_client.query(kind='Boat')
     boats = None
     try: 
         boats = list(query.fetch())
     except:
         print('Failed to fetch Boats')
+    for boat in boats:
+        id = boat.key.id_or_name
+        selfUri = baseUri + str(id)
+        boat.update({"id":boat.key.id_or_name})
+        boat.update({"self":selfUri})
     return boats
 
 def get_boat(boat_id):
@@ -87,7 +92,7 @@ def postBoat():
 
 @app.route('/boats', methods =['GET']) 
 def getBoats():
-    boats = get_boats()
+    boats = get_boats(request.base_url)
     status = 200 if boats is not None else 405 
     print(boats)
     return make_response(jsonify(boats), status)
