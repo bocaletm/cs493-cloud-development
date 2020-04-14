@@ -1,6 +1,7 @@
 import datetime
 import os
-from flask import Flask, Response, request, redirect, url_for
+import json
+from flask import Flask, Response, request, jsonify, make_response
 from google.cloud import datastore
 from google.auth.transport import requests
 import google.oauth2.id_token
@@ -8,13 +9,36 @@ import google.oauth2.id_token
 
 datastore_client = datastore.Client()
 
-#keyFromEnv = os.environ.get("FIREBASE_API_KEY")
+def errorResponse(status,msg):
+    return Response(json.dumps({'Error': msg}, sort_keys=True, indent=4),status, mimetype='application/json')
+
+def contentResponse(status,content):
+    return Response(json.dumps(content, sort_keys=True, indent=4),status=status, mimetype='application/json')
+
+def store_boat(name, boatType, length):
+    kind = 'Boat'
+    boat_key = datastore_client.key(kind)
+    boat = datastore.Entity(key=boat_key)
+    boat.update({
+        "name": name, 
+        "type": boatType, 
+        "length": length
+    })
+    try: 
+        datastore_client.put(boat)
+    except: 
+        print('Failed to save Boat: ' + name)
+        return -1
+    return boat.key.id_or_name
 
 def get_boats():
-    return 200
-
-def store_boat():
-    return 201
+    query = datastore_client.query(kind='Boat')
+    boats = None
+    try: 
+        boats = list(query.fetch())
+    except:
+        print('Failed to fetch Boats')
+    return boats
 
 def get_boat(boat_id):
     return 202
@@ -47,13 +71,26 @@ app = Flask(__name__)
 
 @app.route('/boats', methods =['POST']) 
 def postBoat():
-    status = store_boat() 
-    return Response(status=status)
+    content = request.json
+    if content.get('name',None) == None or content.get('type',None) == None or content.get('length',None) == None:
+        return errorResponse(400,'The request object is missing at least one of the required attributes')
+    id = store_boat(content['name'],content['type'],content['length']) 
+    if id is not -1:
+        status = 201 
+        print('Successfully created: ' + str(id))
+        content.update({"id":id})
+        selfUri = request.base_url + '/boats/' + str(id)
+        content.update({"self": selfUri })
+        return contentResponse(status,content)
+    else:
+        return errorResponse(405,'Unknown')
 
 @app.route('/boats', methods =['GET']) 
 def getBoats():
-    status = get_boats() 
-    return Response(status=status, mimetype='application/json')
+    boats = get_boats()
+    status = 200 if boats is not None else 405 
+    print(boats)
+    return make_response(jsonify(boats), status)
 
 @app.route('/boats/<string:boat_id>', methods =['GET']) 
 def getBoat(boat_id):
