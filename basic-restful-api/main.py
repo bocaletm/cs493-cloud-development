@@ -44,7 +44,7 @@ def get_boats(baseUri):
         print('Failed to fetch Boats')
     for boat in boats:
         id = boat.key.id_or_name
-        selfUri = baseUri + str(id)
+        selfUri = baseUri + '/' + str(id)
         boat.update({"id":boat.key.id_or_name})
         boat.update({"self":selfUri})
     return boats
@@ -91,11 +91,34 @@ def delete_boat(boat_id):
     else:
         return 404
 
-def get_slips():
-    return 200
+def store_slip(number):
+    kind = 'Slip'
+    slip_key = datastore_client.key(kind)
+    slip = datastore.Entity(key=slip_key)
+    slip.update({
+        "number": number, 
+        "current_boat": None
+    })
+    try: 
+        datastore_client.put(slip)
+    except: 
+        print('Failed to save Slip: ' + slip_key)
+        return -1
+    return slip.key.id_or_name
 
-def store_slip():
-    return 201
+def get_slips(baseUri):
+    query = datastore_client.query(kind='Slip')
+    slips = None
+    try: 
+        slips = list(query.fetch())
+    except:
+        print('Failed to fetch Slips')
+    for slip in slips:
+        id = slip.key.id_or_name
+        selfUri = baseUri + '/' + str(id)
+        slip.update({"id":slip.key.id_or_name})
+        slip.update({"self":selfUri})
+    return slips
 
 def get_slip(slip_id):
     return 200
@@ -166,13 +189,26 @@ def deleteBoat(boat_id):
 
 @app.route('/slips', methods =['POST']) 
 def postSlip():
-    status = store_slip() 
-    return Response(status=status)
+    content = request.json
+    if content == None or content.get('number',None) == None:
+        return errorResponse(400,INCOMPLETE)
+    id = store_slip(content['number']) 
+    if id is not -1:
+        status = 201 
+        print('Successfully created: ' + str(id))
+        content.update({"id":id})
+        selfUri = request.base_url + '/slips/' + str(id)
+        content.update({"self": selfUri })
+        return contentResponse(status,content)
+    else:
+        return errorResponse(405,'Unknown')
 
 @app.route('/slips', methods =['GET']) 
 def getSlips():
-    status = get_slips() 
-    return Response(status=status, mimetype='application/json')
+    slips = get_slips(request.base_url)
+    status = 200 if slips is not None else 405 
+    print(slips)
+    return make_response(jsonify(slips), status)
 
 @app.route('/slips/<string:slip_id>', methods =['GET']) 
 def getSlip(slip_id):
