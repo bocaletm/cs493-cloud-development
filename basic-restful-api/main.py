@@ -9,6 +9,10 @@ import google.oauth2.id_token
 
 datastore_client = datastore.Client()
 
+NO_ID = 'No boat with this boat_id exists'
+INCOMPLETE = 'The request object is missing at least one of the required attributes'
+DOCUMENTATION = 'https://canvas.oregonstate.edu/courses/1764544/files/79296197/download'
+
 def errorResponse(status,msg):
     return Response(json.dumps({'Error': msg}, sort_keys=True, indent=4),status, mimetype='application/json')
 
@@ -80,7 +84,12 @@ def update_boat(baseUri, boat_id, name, boatType, length):
         return boat    
 
 def delete_boat(boat_id):
-    return 200
+    boat_key = datastore_client.key('Boat', int(boat_id))
+    if datastore_client.get(boat_key) is not None:
+        datastore_client.delete(boat_key)
+        return 204
+    else:
+        return 404
 
 def get_slips():
     return 200
@@ -106,7 +115,7 @@ app = Flask(__name__)
 def postBoat():
     content = request.json
     if content == None or content.get('name',None) == None or content.get('type',None) == None or content.get('length',None) == None:
-        return errorResponse(400,'The request object is missing at least one of the required attributes')
+        return errorResponse(400,INCOMPLETE)
     id = store_boat(content['name'],content['type'],content['length']) 
     if id is not -1:
         status = 201 
@@ -133,24 +142,27 @@ def getBoat(boat_id):
         print(boat)
         return make_response(jsonify(boat), 200)
     else: 
-        return errorResponse(404,'No boat with this boat_id exists')
+        return errorResponse(404,NO_ID)
 
 @app.route('/boats/<string:boat_id>', methods =['PATCH']) 
 def updateBoat(boat_id):
     content = request.json
     if content == None or content.get('name',None) == None or content.get('type',None) == None or content.get('length',None) == None:
-        return errorResponse(400,'The request object is missing at least one of the required attributes')
+        return errorResponse(400,INCOMPLETE)
     boat = update_boat(request.base_url, boat_id, content['name'], content['type'], content['length']) 
     if boat is not None:
         print(boat)
         return make_response(jsonify(boat), 200)
     else: 
-        return errorResponse(404,'No boat with this boat_id exists')
+        return errorResponse(404,NO_ID)
 
 @app.route('/boats/<string:boat_id>', methods =['DELETE']) 
 def deleteBoat(boat_id):
     status = delete_boat(boat_id) 
-    return Response(status=status, mimetype='application/json')
+    if status == 204:
+        return Response(status=status, mimetype='application/json')
+    else:
+        return errorResponse(status,NO_ID)
 
 @app.route('/slips', methods =['POST']) 
 def postSlip():
@@ -184,7 +196,7 @@ def releaseBoat(slip_id,boat_id):
 
 @app.route('/')
 def root():
-    return Response("{'documentation_uri':'https://canvas.oregonstate.edu/courses/1764544/files/79296197/download'}\n", status=200, mimetype='application/json')
+    return Response("{'documentation_uri': " + DOCUMENTATION + " }\n", status=200, mimetype='application/json')
     
 
 if __name__ == '__main__':
