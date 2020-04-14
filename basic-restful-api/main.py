@@ -45,8 +45,17 @@ def get_boats(baseUri):
         boat.update({"self":selfUri})
     return boats
 
-def get_boat(boat_id):
-    return 202
+def get_boat(boat_id, baseUri):
+    query = datastore_client.query(kind='Boat')
+    boat_key = datastore_client.key('Boat', int(boat_id))
+    query.key_filter(boat_key)
+    boats = query.fetch()
+    for boat in boats:
+        id = boat.key.id_or_name
+        selfUri = baseUri + str(id)
+        boat.update({"id":id})
+        boat.update({"self":selfUri})
+        return boat
 
 def update_boat(boat_id):
     return 200
@@ -99,8 +108,13 @@ def getBoats():
 
 @app.route('/boats/<string:boat_id>', methods =['GET']) 
 def getBoat(boat_id):
-    status = get_boat(boat_id) 
-    return Response(status=status, mimetype='application/json')
+    boat = None
+    boat = get_boat(boat_id, request.base_url) 
+    if boat is not None:
+        print(boat)
+        return make_response(jsonify(boat), 200)
+    else: 
+        return errorResponse(404,'No boat with this boat_id exists')
 
 @app.route('/boats/<string:boat_id>', methods =['PATCH']) 
 def updateBoat(boat_id):
