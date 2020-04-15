@@ -169,13 +169,13 @@ def delete_slip(slip_id):
 
 def dock_boat(slip_id, boat_id):
     if badInt(slip_id) or badInt(boat_id): return errorResponse(404, NO_SLIP_OR_BOAT)
-    dockedSlip = boat_is_docked(boat_id)
-    if dockedSlip != None:
-        return errorResponse(403, SLIP_OCCUPIED)
     boat_key = datastore_client.key('Boat', int(boat_id))
     slip_key = datastore_client.key('Slip', int(slip_id))
     if datastore_client.get(boat_key) is None or datastore_client.get(slip_key) is None:
         return errorResponse(404, NO_SLIP_OR_BOAT)
+    dockedSlip = boat_is_docked(boat_id)
+    if dockedSlip != None:
+        return errorResponse(403, SLIP_OCCUPIED)
     query = datastore_client.query(kind='Slip')
     query.key_filter(slip_key)
     slips = query.fetch()
