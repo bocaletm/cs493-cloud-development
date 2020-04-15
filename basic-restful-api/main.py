@@ -10,12 +10,21 @@ import google.oauth2.id_token
 datastore_client = datastore.Client()
 
 NO_ID = 'No boat with this boat_id exists'
+NO_ID_SLIP = 'No slip with this slip_id exists'
 NO_SLIP_OR_BOAT = 'The specified boat and/or slip don’t exist'
 SLIP_OCCUPIED = 'The slip is not empty'
 ALREADY_DOCKED = 'Boat already docked at Slip '
 DOCKING_NOT_FOUND = 'No boat with this boat_id is at the slip with this slip_id'
 INCOMPLETE = 'The request object is missing at least one of the required attributes'
+INCOMPLETE_SLIP = 'The request object is missing the required number'
 DOCUMENTATION = 'https://canvas.oregonstate.edu/courses/1764544/files/79296197/download'
+
+def badInt(s):
+    try: 
+        int(s)
+        return False
+    except ValueError:
+        return True
 
 def errorResponse(status,msg):
     return Response(json.dumps({'Error': msg}, sort_keys=True, indent=4),status, mimetype='application/json')
@@ -28,13 +37,12 @@ def contentResponse(status,content):
 
 def boat_is_docked(boat_id):
     query = datastore_client.query(kind='Slip')
-    query.add_filter('current_boat', '=', boat_id)
+    query.add_filter('current_boat', '=', int(boat_id))
     query.keys_only()
     slips = query.fetch()
     for slip in slips:
         return slip.key.id_or_name
     return None
-
 
 def store_boat(name, boatType, length):
     kind = 'Boat'
@@ -67,25 +75,25 @@ def get_boats(baseUri):
     return boats
 
 def get_boat(boat_id, baseUri):
+    if badInt(boat_id): return None
     query = datastore_client.query(kind='Boat')
     boat_key = datastore_client.key('Boat', int(boat_id))
     query.key_filter(boat_key)
     boats = query.fetch()
     for boat in boats:
         id = boat.key.id_or_name
-        selfUri = baseUri + str(id)
         boat.update({"id":id})
-        boat.update({"self":selfUri})
+        boat.update({"self":baseUri})
         return boat
 
 def update_boat(baseUri, boat_id, name, boatType, length):
+    if badInt(boat_id): return None
     query = datastore_client.query(kind='Boat')
     boat_key = datastore_client.key('Boat', int(boat_id))
     query.key_filter(boat_key)
     boats = query.fetch()
     for boat in boats:
         id = boat.key.id_or_name
-        selfUri = baseUri + str(id)
         boat.update({
             "name": name, 
             "type": boatType, 
@@ -94,11 +102,14 @@ def update_boat(baseUri, boat_id, name, boatType, length):
         datastore_client.put(boat)
         boat.update({
             "id": id,
-            "self": selfUri
+            "self": baseUri
         })        
         return boat    
 
 def delete_boat(boat_id):
+    if badInt(boat_id): return 404
+    slip_id = boat_is_docked(boat_id)
+    if slip_id is not None: print(release_boat(slip_id,boat_id))
     boat_key = datastore_client.key('Boat', int(boat_id))
     if datastore_client.get(boat_key) is not None:
         datastore_client.delete(boat_key)
@@ -136,18 +147,19 @@ def get_slips(baseUri):
     return slips
 
 def get_slip(slip_id, baseUri):
+    if badInt(slip_id): return None
     query = datastore_client.query(kind='Slip')
     slip_key = datastore_client.key('Slip', int(slip_id))
     query.key_filter(slip_key)
     slips = query.fetch()
     for slip in slips:
         id = slip.key.id_or_name
-        selfUri = baseUri + str(id)
         slip.update({"id":id})
-        slip.update({"self":selfUri})
+        slip.update({"self":baseUri})
         return slip
 
 def delete_slip(slip_id):
+    if badInt(slip_id): return 404
     slip_key = datastore_client.key('Slip', int(slip_id))
     if datastore_client.get(slip_key) is not None:
         datastore_client.delete(slip_key)
@@ -156,9 +168,10 @@ def delete_slip(slip_id):
         return 404
 
 def dock_boat(slip_id, boat_id):
+    if badInt(slip_id) or badInt(boat_id): return errorResponse(404, NO_SLIP_OR_BOAT)
     dockedSlip = boat_is_docked(boat_id)
     if dockedSlip != None:
-        return errorResponse(403, ALREADY_DOCKED + str(dockedSlip))
+        return errorResponse(403, SLIP_OCCUPIED)
     boat_key = datastore_client.key('Boat', int(boat_id))
     slip_key = datastore_client.key('Slip', int(slip_id))
     if datastore_client.get(boat_key) is None or datastore_client.get(slip_key) is None:
@@ -170,20 +183,17 @@ def dock_boat(slip_id, boat_id):
         if slip.get('current_boat',None) != None:
             return errorResponse(403, SLIP_OCCUPIED)
         slip.update({
-            "current_boat": boat_id
+            "current_boat": int(boat_id)
         })
         datastore_client.put(slip)
         return codeResponse(204)
 
 def release_boat(slip_id, boat_id):
+    if badInt(slip_id) or badInt(boat_id): return errorResponse(404, DOCKING_NOT_FOUND)
     dockedSlip = boat_is_docked(boat_id)
     boat_key = datastore_client.key('Boat', int(boat_id))
     slip_key = datastore_client.key('Slip', int(slip_id))
     if dockedSlip == None or int(dockedSlip) != int(slip_id) or datastore_client.get(boat_key) is None or datastore_client.get(slip_key) is None:
-        print(dockedSlip)
-        print(slip_id)
-        print(datastore_client.get(boat_key))
-        print(datastore_client.get(slip_key))
         return errorResponse(404, DOCKING_NOT_FOUND)
 
     query = datastore_client.query(kind='Slip')
@@ -208,7 +218,7 @@ def postBoat():
         status = 201 
         print('Successfully created: ' + str(id))
         content.update({"id":id})
-        selfUri = request.base_url + '/boats/' + str(id)
+        selfUri = request.base_url + '/' + str(id)
         content.update({"self": selfUri })
         return contentResponse(status,content)
     else:
@@ -254,13 +264,14 @@ def deleteBoat(boat_id):
 def postSlip():
     content = request.json
     if content == None or content.get('number',None) == None:
-        return errorResponse(400,INCOMPLETE)
+        return errorResponse(400,INCOMPLETE_SLIP)
     id = store_slip(content['number']) 
     if id is not -1:
         status = 201 
         print('Successfully created: ' + str(id))
         content.update({"id":id})
-        selfUri = request.base_url + '/slips/' + str(id)
+        content.update({"current_boat":None})
+        selfUri = request.base_url + '/' + str(id)
         content.update({"self": selfUri })
         return contentResponse(status,content)
     else:
@@ -280,7 +291,7 @@ def getSlip(slip_id):
         print(slip)
         return make_response(jsonify(slip), 200)
     else: 
-        return errorResponse(404,NO_ID)
+        return errorResponse(404,NO_ID_SLIP)
 
 @app.route('/slips/<string:slip_id>', methods =['DELETE']) 
 def deleteSlip(slip_id):
@@ -288,7 +299,7 @@ def deleteSlip(slip_id):
     if status == 204:
         return codeResponse(status)
     else:
-        return errorResponse(status,NO_ID)
+        return errorResponse(status,NO_ID_SLIP)
 
 @app.route('/slips/<string:slip_id>/<string:boat_id>', methods =['PUT']) 
 def dockBoat(slip_id, boat_id):
