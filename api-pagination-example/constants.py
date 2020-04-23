@@ -8,3 +8,4 @@ class Constants:
     INCOMPLETE = 'The request object is missing at least one of the required attributes'
     INCOMPLETE_SLIP = 'The request object is missing the required number'
     DOCUMENTATION = 'https://canvas.oregonstate.edu/courses/1764544/files/79296197/download'
+    limit = 3

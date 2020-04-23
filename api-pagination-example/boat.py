@@ -32,10 +32,16 @@ def store_boat(name, boatType, length):
     return boat.key.id_or_name
 
 def get_boats(baseUri):
+    limit = C.limit
+    offset = int(request.args.get('offset', '0'))
     query = datastore_client.query(kind='Boat')
+    iterator = None
     boats = None
+    nextUri = None
     try: 
-        boats = list(query.fetch())
+        iterator = query.fetch(limit=limit, offset=offset)
+        pages = iterator.pages
+        boats = list(next(pages))
     except:
         print('Failed to fetch Boats')
     for boat in boats:
@@ -43,7 +49,14 @@ def get_boats(baseUri):
         selfUri = baseUri + '/' + str(id)
         boat.update({"id":boat.key.id_or_name})
         boat.update({"self":selfUri})
-    return boats
+        if iterator.next_page_token:
+            nextUri = baseUri + '?offset=' + str(offset + limit)
+            boat.update({"next":nextUri})
+    if nextUri is not None:
+        response = {"boats":boats,"next":nextUri}
+    else:
+        response = {"boats":boats}
+    return response
 
 def get_boat(boat_id, baseUri):
     if V.badInt(boat_id): return None
