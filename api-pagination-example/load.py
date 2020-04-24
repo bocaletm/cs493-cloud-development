@@ -1,15 +1,13 @@
+import boat as B
 from json import load
 from helpers import Conversion
 from flask import Blueprint, request, jsonify, make_response
 from google.cloud import datastore
 import google.oauth2.id_token
-import datetime
-import boat
 from constants import Constants as C
 from helpers import Conversion 
 from helpers import CustomResponse
 from helpers import Validation
-import boat
 
 bp = Blueprint('load', __name__, url_prefix='/loads')
 datastore_client = datastore.Client()
@@ -105,7 +103,7 @@ def remove_boat_from_load(load_id,boat_id):
     loads = load_query.fetch()
     try:
         for load in loads:
-            load['carrier'].update(None)
+            load.update({"carrier": None})
             datastore_client.put(load)
             return True
     except:
@@ -152,6 +150,12 @@ def get_loads(baseUri):
     for load in loads:
         id = load.key.id_or_name
         selfUri = baseUri + '/' + str(id)
+        if (load['carrier'] is not None):
+            boat = B.get_boat(load['carrier'],baseUri)
+            del boat['loads']
+            del boat['length']
+            del boat['type']
+            load.update({"carrier":boat})
         load.update({"id":load.key.id_or_name})
         load.update({"self":selfUri})
         date = convert.stringFromEpoch(load.get('delivery_date'))
@@ -174,6 +178,12 @@ def get_load(load_id, baseUri):
     for load in loads:
         id = load.key.id_or_name
         date = convert.stringFromEpoch(load.get('delivery_date'))
+        if (load['carrier'] is not None):
+            boat = B.get_boat(load['carrier'],baseUri)
+            del boat['loads']
+            del boat['length']
+            del boat['type']
+            load.update({"carrier":boat})
         load.update({"id":id})
         load.update({"delivery_date":date})
         load.update({"self":baseUri})
@@ -200,7 +210,7 @@ def postLoad():
         return R.errorResponse(405,'Unknown')
 
 @bp.route('/<string:load_id>', methods=['GET'])
-def getBoat(load_id):
+def getLoad(load_id):
     load = get_load(load_id, request.base_url) 
     if load is not None:
         print(load)
@@ -227,6 +237,4 @@ def assignLoad(load_id,boat_id):
 def removeLoad(load_id,boat_id):
     if V.badInt(load_id) or V.badInt(load_id):
         return R.errorResponse(404,C.NO_ID)
-    if not already_assigned(load_id):
-        return R.codeResponse(204)
     return remove_load(load_id,boat_id)

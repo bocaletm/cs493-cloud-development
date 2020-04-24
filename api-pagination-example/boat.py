@@ -5,7 +5,7 @@ import boat
 from constants import Constants as C
 from helpers import CustomResponse
 from helpers import Validation
-import load
+import load as L
 
 bp = Blueprint('boat', __name__, url_prefix='/boats')
 datastore_client = datastore.Client()
@@ -46,6 +46,11 @@ def get_boats(baseUri):
         print('Failed to fetch Boats')
     for boat in boats:
         id = boat.key.id_or_name
+        if (boat['loads'] is not None):
+            for loadID in boat['loads']:
+                boat['loads'].remove(loadID)
+                selfUri =  baseUri.split('boats/', 1)[0] + 'loads/' + str(loadID)
+                boat['loads'].append({"id":str(loadID), "self":selfUri})
         selfUri = baseUri + '/' + str(id)
         boat.update({"id":boat.key.id_or_name})
         boat.update({"self":selfUri})
@@ -66,6 +71,11 @@ def get_boat(boat_id, baseUri):
     boats = query.fetch()
     for boat in boats:
         id = boat.key.id_or_name
+        if (boat['loads'] is not None):
+            for loadID in boat['loads']:
+                boat['loads'].remove(loadID)
+                selfUri =  baseUri.split('boats/', 1)[0] + 'loads/' + str(loadID)
+                boat['loads'].append({"id":str(loadID), "self":selfUri})
         boat.update({"id":id})
         boat.update({"self":baseUri})
         return boat
