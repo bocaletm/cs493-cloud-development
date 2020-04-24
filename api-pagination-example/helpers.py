@@ -1,3 +1,4 @@
+import datetime
 from flask import Response
 import json
 
@@ -8,6 +9,20 @@ class Validation:
             return False
         except ValueError:
             return True
+
+    def badDate(self,s):
+        try:
+            date = datetime.datetime.strptime(s, '%m-%d-%Y')
+            return False
+        except Exception:
+            return True
+
+class Conversion:
+    def epochFromString(self,s):
+        return datetime.datetime.timestamp(datetime.datetime.strptime(s.replace('/','-'), '%m-%d-%Y'))
+
+    def stringFromEpoch(self,e):
+        return datetime.datetime.fromtimestamp(e).strftime('%m-%d-%Y').replace('-','/')
 
 class CustomResponse:
     def errorResponse(self,status,msg):
