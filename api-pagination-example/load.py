@@ -82,6 +82,17 @@ def assign_load(load_id,boat_id):
     else: 
         return R.codeResponse(201)
 
+def delete_load(load_id,baseUri):
+    if V.badInt(load_id): return 403
+    load_key = datastore_client.key('Load', int(load_id))
+    if datastore_client.get(load_key) is not None:
+        load = get_load(load_id,baseUri)
+        boat_id = load['carrier']
+        if boat_id is not None:
+            remove_load_from_boat(load_key.id_or_name,int(boat_id['id']))
+        datastore_client.delete(load_key)
+    return 204
+
 def remove_load_from_boat(load_id,boat_id):
     boat_key = datastore_client.key('Boat', int(boat_id))
     load_key = datastore_client.key('Load', int(load_id))
@@ -113,8 +124,10 @@ def remove_load(load_id,boat_id):
     try:
         remove_load_from_boat(load_id,boat_id)
         remove_boat_from_load(load_id,boat_id)
+        print("load_id: " + load_id + " boat_id: " + boat_id)
         return R.codeResponse(204)
     except: 
+        print("load_id: " + load_id + " boat_id: " + boat_id)
         return R.codeResponse(500)
 
 def store_load(weight,content,delivery_date):
@@ -151,6 +164,7 @@ def get_loads(baseUri):
         id = load.key.id_or_name
         selfUri = baseUri + '/' + str(id)
         if (load['carrier'] is not None):
+            print(load['carrier'])
             boat = B.get_boat(load['carrier'],baseUri)
             del boat['loads']
             del boat['length']
@@ -211,12 +225,14 @@ def postLoad():
 
 @bp.route('/<string:load_id>', methods=['GET'])
 def getLoad(load_id):
+    if V.badInt(load_id):
+        return R.errorResponse(403,C.NO_ID)
     load = get_load(load_id, request.base_url) 
     if load is not None:
         print(load)
         return make_response(jsonify(load), 200)
     else: 
-        return R.errorResponse(404,C.NO_ID)
+        return R.errorResponse(404,C.NO_ID_LOAD)
 
 @bp.route('', methods=['GET'])
 def getLoads():
@@ -227,14 +243,20 @@ def getLoads():
 
 @bp.route('/<string:load_id>/<string:boat_id>', methods=['PUT'])
 def assignLoad(load_id,boat_id):
-    if V.badInt(load_id) or V.badInt(load_id):
-        return R.errorResponse(404,C.NO_ID)
+    if V.badInt(load_id) or V.badInt(boat_id):
+        return R.errorResponse(403,C.NO_ID)
     if already_assigned(load_id):
         return R.errorResponse(403,C.ALREADY_ASSIGNED)
     return assign_load(load_id,boat_id)
 
 @bp.route('/<string:load_id>/<string:boat_id>', methods=['DELETE'])
 def removeLoad(load_id,boat_id):
-    if V.badInt(load_id) or V.badInt(load_id):
+    if V.badInt(load_id) or V.badInt(boat_id):
         return R.errorResponse(404,C.NO_ID)
     return remove_load(load_id,boat_id)
+
+@bp.route('/<string:load_id>', methods=['DELETE'])
+def deleteLoad(load_id):
+    if V.badInt(load_id):
+        return R.errorResponse(403,C.NO_ID)
+    return R.codeResponse(delete_load(load_id,request.base_url))

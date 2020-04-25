@@ -100,16 +100,14 @@ def update_boat(baseUri, boat_id, name, boatType, length):
         })        
         return boat    
 
-def delete_boat(boat_id):
-    if V.badInt(boat_id): return 404
-    slip_id = boat_is_docked(boat_id)
-    if slip_id is not None: print(release_boat(slip_id,boat_id))
+def delete_boat(boat_id,baseUri):
     boat_key = datastore_client.key('Boat', int(boat_id))
     if datastore_client.get(boat_key) is not None:
+        boat = get_boat(boat_id,baseUri)
+        for load in boat['loads']:
+            print(L.remove_boat_from_load(load['id'],boat_id))
         datastore_client.delete(boat_key)
-        return 204
-    else:
-        return 404
+    return 204
 
 @bp.route('', methods=['POST'])
 def postBoat():
@@ -136,12 +134,14 @@ def getBoats():
 
 @bp.route('/<string:boat_id>', methods=['GET'])
 def getBoat(boat_id):
+    if V.badInt(boat_id):
+        return R.errorResponse(403,C.NO_ID)
     boat = get_boat(boat_id, request.base_url) 
     if boat is not None:
         print(boat)
         return make_response(jsonify(boat), 200)
     else: 
-        return R.errorResponse(404,C.NO_ID)
+        return R.errorResponse(404,C.NO_ID_BOAT)
 
 @bp.route('/<string:boat_id>', methods=['PATCH'])
 def updateBoat(boat_id):
@@ -157,8 +157,6 @@ def updateBoat(boat_id):
 
 @bp.route('/<string:boat_id>', methods=['DELETE'])
 def deleteBoat(boat_id):
-    status = delete_boat(boat_id) 
-    if status == 204:
-        return R.codeResponse(status)
-    else:
-        return R.errorResponse(status,C.NO_ID)
+    if V.badInt(boat_id):
+        return R.errorResponse(403,C.NO_ID)
+    return R.codeResponse(delete_boat(boat_id,request.base_url))
