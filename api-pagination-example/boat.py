@@ -49,7 +49,8 @@ def get_boats(baseUri):
         if (boat['loads'] is not None):
             for loadID in boat['loads']:
                 boat['loads'].remove(loadID)
-                selfUri =  baseUri.split('boats/', 1)[0] + 'loads/' + str(loadID)
+                print(baseUri)
+                selfUri =  baseUri.split('boats', 1)[0] + 'loads/' + str(loadID)
                 boat['loads'].append({"id":str(loadID), "self":selfUri})
         selfUri = baseUri + '/' + str(id)
         boat.update({"id":boat.key.id_or_name})
