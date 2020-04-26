@@ -166,6 +166,8 @@ def get_loads(baseUri):
         if (load['carrier'] is not None):
             print(load['carrier'])
             boat = B.get_boat(load['carrier'],baseUri)
+            boatSelfUri =  baseUri.split('loads', 1)[0] + 'boats/' + str(boat['id'])
+            boat['self'] = boatSelfUri
             del boat['loads']
             del boat['length']
             del boat['type']
@@ -194,6 +196,8 @@ def get_load(load_id, baseUri):
         date = convert.stringFromEpoch(load.get('delivery_date'))
         if (load['carrier'] is not None):
             boat = B.get_boat(load['carrier'],baseUri)
+            boatSelfUri =  baseUri.split('loads', 1)[0] + 'boats/' + str(boat['id'])
+            boat['self'] = boatSelfUri
             del boat['loads']
             del boat['length']
             del boat['type']
