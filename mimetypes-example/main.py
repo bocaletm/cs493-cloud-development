@@ -1,13 +1,10 @@
 from flask import Flask, Response
 from google.cloud import datastore
 import boat
-import constants
-import load
 from constants import Constants as C
 
 app = Flask(__name__)
 app.register_blueprint(boat.bp)
-app.register_blueprint(load.bp)
 
 datastore_client = datastore.Client()
 

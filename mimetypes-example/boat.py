@@ -1,7 +1,6 @@
 from flask import Blueprint, request, jsonify, make_response
 from google.cloud import datastore
 import google.oauth2.id_token
-import boat
 from constants import Constants as C
 from helpers import CustomResponse
 from helpers import Validation
@@ -20,7 +19,6 @@ def store_boat(name, boatType, length):
         "name": name, 
         "type": boatType, 
         "length": length,
-        "loads": [],
     })
     try: 
         datastore_client.put(boat)
@@ -45,12 +43,6 @@ def get_boats(baseUri):
         print('Failed to fetch Boats')
     for boat in boats:
         id = boat.key.id_or_name
-        if (boat['loads'] is not None):
-            for loadID in boat['loads']:
-                boat['loads'].remove(loadID)
-                print(baseUri)
-                selfUri =  baseUri.split('boats', 1)[0] + 'loads/' + str(loadID)
-                boat['loads'].append({"id":str(loadID), "self":selfUri})
         selfUri = baseUri + '/' + str(id)
         boat.update({"id":boat.key.id_or_name})
         boat.update({"self":selfUri})
@@ -71,11 +63,6 @@ def get_boat(boat_id, baseUri):
     boats = query.fetch()
     for boat in boats:
         id = boat.key.id_or_name
-        if (boat['loads'] is not None):
-            for loadID in boat['loads']:
-                boat['loads'].remove(loadID)
-                selfUri =  baseUri.split('boats/', 1)[0] + 'loads/' + str(loadID)
-                boat['loads'].append({"id":str(loadID), "self":selfUri})
         boat.update({"id":id})
         boat.update({"self":baseUri})
         return boat
@@ -99,7 +86,35 @@ def update_boat(baseUri, boat_id, name, boatType, length):
             "self": baseUri
         })        
         return boat    
+    return None
 
+def patch_boat(baseUri, boat_id, name, boatType, length):
+    if V.badInt(boat_id): return None
+    query = datastore_client.query(kind='Boat')
+    boat_key = datastore_client.key('Boat', int(boat_id))
+    query.key_filter(boat_key)
+    boats = query.fetch()
+    for boat in boats:
+        id = boat.key.id_or_name
+        if name is not None:
+            boat.update({
+                "name": name, 
+            })
+        if boatType is not None:
+            boat.update({
+                "type": boatType, 
+            })
+        if length is not None:
+            boat.update({
+                "length": length, 
+            })
+        datastore_client.put(boat)
+        boat.update({
+            "id": id,
+            "self": baseUri
+        })        
+        return boat    
+    return None
 def delete_boat(boat_id,baseUri):
     boat_key = datastore_client.key('Boat', int(boat_id))
     if datastore_client.get(boat_key) is not None:
@@ -108,26 +123,45 @@ def delete_boat(boat_id,baseUri):
 
 @bp.route('', methods=['POST'])
 def postBoat():
+    if 'application/json' not in request.accept_mimetypes:
+        return R.errorResponse(406,'Unsupported mimetype in request')
     content = request.json
-    if content == None or content.get('name',None) == None or content.get('type',None) == None or content.get('length',None) == None:
-        return R.errorResponse(400,C.INCOMPLETE)
-    id = store_boat(content['name'],content['type'],content['length']) 
+    result = V.validateBoat(content)
+    print(result)
+    if result.get('code') == 0:
+        id = store_boat(content['name'],content['type'],content['length']) 
+    else:
+        id = -1
+        return R.errorResponse(result.get('code'),result.get('msg'))   
     if id is not -1:
-        status = 201 
         print('Successfully created: ' + str(id))
         content.update({"id":id})
         selfUri = request.base_url + '/' + str(id)
         content.update({"self": selfUri })
-        return R.contentResponse(status,content)
+        return R.contentResponse(201,content)
     else:
         return R.errorResponse(405,'Unknown')
 
+@bp.route('', methods=['PUT'])
+def badPut():
+    return R.errorResponse(405,'Method not allowed')
+
+@bp.route('', methods=['PATCH'])
+def badPatch():
+    return R.errorResponse(405,'Method not allowed')
+
+@bp.route('', methods=['DELETE'])
+def badDelete():
+    return R.errorResponse(405,'Method not allowed')
+
 @bp.route('', methods=['GET'])
 def getBoats():
+    if 'application/json' not in request.accept_mimetypes:
+        return R.errorResponse(406,'Unsupported mimetype in request')
     boats = get_boats(request.base_url)
-    status = 200 if boats is not None else 405 
+    status = 200 if boats is not None else 500 
     print(boats)
-    return make_response(jsonify(boats), status)
+    return R.contentResponse(status,boats)
 
 @bp.route('/<string:boat_id>', methods=['GET'])
 def getBoat(boat_id):
@@ -140,17 +174,45 @@ def getBoat(boat_id):
     else: 
         return R.errorResponse(404,C.NO_ID_BOAT)
 
-@bp.route('/<string:boat_id>', methods=['PATCH'])
+@bp.route('/<string:boat_id>', methods=['PUT'])
 def updateBoat(boat_id):
+    if 'application/json' not in request.accept_mimetypes:
+        return R.errorResponse(406,'Unsupported mimetype in request')
+    if V.badInt(boat_id):
+        return R.errorResponse(400,C.NO_ID)
     content = request.json
-    if content == None or content.get('name',None) == None or content.get('type',None) == None or content.get('length',None) == None:
-        return R.errorResponse(400,C.INCOMPLETE)
-    boat = update_boat(request.base_url, boat_id, content['name'], content['type'], content['length']) 
+    result = V.validateBoat(content)
+    print(result)
+    if result.get('code') == 0:
+        boat = update_boat(request.base_url, boat_id, content['name'], content['type'], content['length']) 
+    else:
+        return R.errorResponse(result.get('code'),result.get('msg'))
     if boat is not None:
         print(boat)
-        return make_response(jsonify(boat), 200)
+        response =  make_response(jsonify(boat), 303)
+        response.headers['Location'] = request.base_url
+        return response
     else: 
-        return R.errorResponse(404,C.NO_ID)
+        return R.errorResponse(404,C.NO_ID_BOAT)
+
+@bp.route('/<string:boat_id>', methods=['PATCH'])
+def patchBoat(boat_id):
+    if 'application/json' not in request.accept_mimetypes:
+        return R.errorResponse(406,'Unsupported mimetype in request')
+    if V.badInt(boat_id):
+        return R.errorResponse(400,C.NO_ID)
+    content = request.json
+    result = V.validatePartialBoat(content)
+    print(result)
+    if result.get('code') == 0:
+        boat = patch_boat(request.base_url, boat_id, content.get('name',None), content.get('type',None), content.get('length',None)) 
+    else:
+        return R.errorResponse(result.get('code'),result.get('msg'))
+    if boat is not None:
+        print(boat)
+        return make_response(jsonify(boat), 201)
+    else: 
+        return R.errorResponse(404,C.NO_ID_BOAT)
 
 @bp.route('/<string:boat_id>', methods=['DELETE'])
 def deleteBoat(boat_id):
