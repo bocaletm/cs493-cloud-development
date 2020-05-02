@@ -130,3 +130,4 @@ dmypy.json
 
 # avoid pushing keys
 app.yaml
+credentials.json
