@@ -5,6 +5,7 @@ class Constants:
     INVALID_DATA = 'Invalid data for at least one of the required attributes'
     ID_UPDATE = 'Cannot set id attribute'
     EXTRA_ATTRIBUTES = 'Unrecognized attributes in request'
+    NOT_UNIQUE = 'Boat names must be unique'
     DOCUMENTATION = ''
     limit = 3
     maxBoatLength = 1600
@@ -14,3 +15,4 @@ class Constants:
     maxTypeLength = 255
     NUM_BOAT_ATTRIBUTES = 3
     validChars = '^[a-zA-Z0-9 ]+$'
+    kind = 'Boat'

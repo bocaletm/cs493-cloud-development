@@ -1,0 +1,2902 @@
+{
+	"info": {
+		"_postman_id": "51c2f027-fb5b-4be2-935c-971291046925",
+		"name": "hw5-bocaletm",
+		"description": "This collection tests the API specification given for Assignment 3.\nIn order to run this collection, you need an environment which has the following 3 environment variables pre-defined:\n\napp_url\n- Set this to your app. E.g., when running locally set it to http://localhost:8080. When running the app on GCP. set it to https://myapp.appsport.com\n\ninvalid_boat_id\n- Set it to a value that's not an ID of any boat in your project. I have set it to 1 and that should work for you as well.\n- \n\ninvalid_slip_id\n- Set it to a value that's not an ID of any slip in your porject. I have set it to 1 and that should work for you as well.\n",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "add boat with missing attributes 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "b3940677-ad47-4fac-be53-1c9844e2e9dc",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The request object is missing at least one of the required attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Aquila\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "bad post url redirect",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f07ce90e-f437-4090-937c-d09368f02448",
+						"exec": [
+							"pm.test(\"301 status code\", function () {",
+							"    pm.response.to.have.status(301);",
+							"});",
+							"",
+							"pm.test(\"location header matches app url\", function () {",
+							"    const self_url = pm.environment.get(\"app_url\") + \"/boats\";",
+							"     pm.expect(postman.getResponseHeader(\"Location\")).eq(self_url);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Aquila\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add boat with special characters in name 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ee2ad3d6-259e-4260-b1da-37507d638375",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Invalid data for at least one of the required attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"name\": \"Senec@\",\r\n  \"type\": \"Navis\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add boat with name too long 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "26ed38e1-0e0a-4e03-be43-7d1f97232b64",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Invalid data for at least one of the required attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"name\": \"Lorem ipsum dolor sit amet  consectetur adipiscing elit  Nam faucibus lectus nec eros interdum pharetra  In egestas odio ex  non pharetra massa hendrerit non  Orci varius natoque penatibus et magnis dis parturient montes  nascetur ridiculus mus  Duis orci \",\r\n  \"type\": \"Navis\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add boat with name too short 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "db63eeca-14bc-4fe3-90ad-3cc9aaa5881d",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Invalid data for at least one of the required attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"name\": \"fi\",\r\n  \"type\": \"Navis\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add boat with special characters in type 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "797d0196-ce53-4c24-84fd-cdafc43f2e19",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Invalid data for at least one of the required attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"name\": \"Seneca\",\r\n  \"type\": \"Nav!s\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add boat with type too long 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0e6d05ce-9251-47d1-8c32-7707477dfea5",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Invalid data for at least one of the required attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"name\": \"Seneca\",\r\n  \"type\": \"Lorem ipsum dolor sit amet  consectetur adipiscing elit  Nam faucibus lectus nec eros interdum pharetra  In egestas odio ex  non pharetra massa hendrerit non  Orci varius natoque penatibus et magnis dis parturient montes  nascetur ridiculus mus  Duis orci \",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add boat with type too short 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "914670a1-7d3b-4e98-b827-1c3beb7462ac",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Invalid data for at least one of the required attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"name\": \"Seneca\",\r\n  \"type\": \"fi\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add boat with too long length 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8ef20d42-4be1-4266-b759-a76e5dffe255",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Invalid data for at least one of the required attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"name\": \"Seneca\",\r\n  \"type\": \"Navis\",\r\n  \"length\": 10000\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add boat with id 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2a4f8e5a-9c8b-4183-a8b2-699918da229b",
+						"exec": [
+							"",
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\":123,\r\n  \"name\": \"Aquila\",\r\n  \"type\": \"Quinquereme\",\r\n  \"length\": 100\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add boat 201",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "5095c672-d6a5-43b6-bfaf-56e9c1c9a287",
+						"exec": [
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    pm.response.to.have.status(201);",
+							"    pm.environment.set(\"boat1_id\", pm.response.json()[\"id\"]);",
+							"});",
+							"",
+							"",
+							"pm.test(\"content is valid\", function () {",
+							"    pm.expect(pm.response.json()[\"name\"]).to.eq(\"Aquila\");",
+							"    pm.expect(pm.response.json()[\"type\"]).to.eq(\"Quinquereme\");",
+							"    pm.expect(pm.response.json()[\"length\"]).to.eq(500);",
+							"    const self_url = pm.environment.get(\"app_url\") + \"/boats/\" + pm.response.json()[\"id\"];",
+							"    pm.expect(pm.response.json()[\"self\"]).to.eq(self_url);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Aquila\",\r\n  \"type\": \"Quinquereme\",\r\n  \"length\": 500\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add boat with same name 403",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "66abf29f-0a1d-4291-8e40-fb1e5a319a8b",
+						"exec": [
+							"",
+							"pm.test(\"403 status code\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});",
+							"",
+							"",
+							"pm.test(\"403 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Boat names must be unique\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Aquila\",\r\n  \"type\": \"Quinquereme\",\r\n  \"length\": 500\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add second boat",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7d0c6bf1-f5e5-4bd1-a7df-26a2aeca4035",
+						"exec": [
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    pm.response.to.have.status(201);",
+							"    pm.environment.set(\"boat2_id\", pm.response.json()[\"id\"]);",
+							"});",
+							"",
+							"",
+							"pm.test(\"content is valid\", function () {",
+							"    pm.expect(pm.response.json()[\"name\"]).to.eq(\"Corvus\");",
+							"    pm.expect(pm.response.json()[\"type\"]).to.eq(\"Trireme\");",
+							"    pm.expect(pm.response.json()[\"length\"]).to.eq(100);",
+							"    const self_url = pm.environment.get(\"app_url\") + \"/boats/\" + pm.response.json()[\"id\"];",
+							"    pm.expect(pm.response.json()[\"self\"]).to.eq(self_url);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Corvus\",\r\n  \"type\": \"Trireme\",\r\n  \"length\": 100\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add third boat",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cb76264e-1061-426e-98af-699ba5a0f661",
+						"exec": [
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    pm.response.to.have.status(201);",
+							"    pm.environment.set(\"boat3_id\", pm.response.json()[\"id\"]);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Passer\",\r\n  \"type\": \"Bireme\",\r\n  \"length\": 50\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add fourth boat",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "62f0685a-bfbb-47a6-b625-31ac8e12d2c0",
+						"exec": [
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    pm.response.to.have.status(201);",
+							"    pm.environment.set(\"boat4_id\", pm.response.json()[\"id\"]);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Cicero\",\r\n  \"type\": \"Navis\",\r\n  \"length\": 100\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add fifth boat",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9fa02a77-459d-4e3e-83b1-f17539083e81",
+						"exec": [
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    pm.response.to.have.status(201);",
+							"    pm.environment.set(\"boat5_id\", pm.response.json()[\"id\"]);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Cato\",\r\n  \"type\": \"Navis\",\r\n  \"length\": 100\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add sixth boat",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "957bf872-886e-4ac2-8ca4-55d692f45884",
+						"exec": [
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    pm.response.to.have.status(201);",
+							"    pm.environment.set(\"boat6_id\", pm.response.json()[\"id\"]);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Crassus\",\r\n  \"type\": \"Navis\",\r\n  \"length\": 100\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add seventh boat",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a07e6a0e-2680-4c3a-baef-ea195ccc29f6",
+						"exec": [
+							"",
+							"pm.test(\"201 status code\", function () {",
+							"    pm.response.to.have.status(201);",
+							"    pm.environment.set(\"boat7_id\", pm.response.json()[\"id\"]);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Catullus\",\r\n  \"type\": \"Phasellus\",\r\n  \"length\": 100\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get boat 200",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "904c51d3-194f-4cf1-93ab-5a91ac113d82",
+						"exec": [
+							"pm.test(\"200 status code\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"check content header exists\", function () {",
+							"     pm.expect(responseHeaders.hasOwnProperty(\"Content-Type\")).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"content type is json\", function () {",
+							"     pm.expect(postman.getResponseHeader(\"Content-Type\")).eq('application/json');",
+							"});",
+							"",
+							"pm.test(\"content is valid\", function () {",
+							"    pm.expect(pm.response.json()[\"name\"]).to.eq(\"Aquila\");",
+							"    pm.expect(pm.response.json()[\"type\"]).to.eq(\"Quinquereme\");",
+							"    pm.expect(pm.response.json()[\"length\"]).to.eq(500);",
+							"    const self_url = pm.environment.get(\"app_url\") + \"/boats/\" + pm.response.json()[\"id\"];",
+							"    pm.expect(pm.response.json()[\"self\"]).to.eq(self_url);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get boat html 200",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "bca8837f-8eb8-4984-9bca-e9aa9c60d668",
+						"exec": [
+							"const $ = cheerio.load(pm.response.text())",
+							"",
+							"pm.test(\"200 status code\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"check content header exists\", function () {",
+							"     pm.expect(responseHeaders.hasOwnProperty(\"Content-Type\")).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"content type is html\", function () {",
+							"     pm.expect(postman.getResponseHeader(\"Content-Type\")).eq('text/html');",
+							"});",
+							"",
+							"pm.test(\"returns html table\", function () {",
+							"    pm.expect($('table').text()).to.not.be.empty ",
+							"});",
+							"",
+							"valuesString = $('td').text()",
+							"",
+							"pm.test(\"check that name is returned\", function () {",
+							"     pm.expect(valuesString).to.contain('Aquila');",
+							"});",
+							"",
+							"pm.test(\"check that type is returned\", function () {",
+							"     pm.expect(valuesString).to.contain('Quinquereme');",
+							"});",
+							"",
+							"pm.test(\"check that length is returned\", function () {",
+							"     pm.expect(valuesString).to.contain('500');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "text/html",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get boat with invalid id 403",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "32a701cc-8041-4350-829e-18d19f104052",
+						"exec": [
+							"pm.test(\"403 not found\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});",
+							"",
+							"pm.test(\"403 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Invalid id\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/boats/abc",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"abc"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get boat with valid fake id 404",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4a2deb67-b59c-42c1-a9c9-6719d2880f75",
+						"exec": [
+							"pm.test(\"404 not found\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"",
+							"pm.test(\"404 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"No boat with this boat_id exists\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/boats/1111111111111111",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"1111111111111111"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "bad get url redirect",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "09c0b9ff-a727-4ffc-86f2-54818a094b20",
+						"exec": [
+							"pm.test(\"301 status code\", function () {",
+							"    pm.response.to.have.status(301);",
+							"});",
+							"",
+							"pm.test(\"location header matches app url\", function () {",
+							"    const self_url = pm.environment.get(\"app_url\") + \"/boats\";",
+							"     pm.expect(postman.getResponseHeader(\"Location\")).eq(self_url);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/boats/",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all boats page 1 200",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8a62d462-fe9c-4515-869b-b02eb9dc67e9",
+						"exec": [
+							"pm.test(\"200 status code\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"At least one boat exists\", function(){",
+							"   pm.expect(Object.keys(pm.response.json()).length).to.be.at.least(1);",
+							"});",
+							"",
+							"pm.environment.set(\"next_boats\", pm.response.json()[\"next\"]);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all boats page 2 200",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2e95b3d6-fbad-42ef-a855-1dd3f5801d19",
+						"exec": [
+							"pm.test(\"200 status code\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"At least one boat exists\", function(){",
+							"   pm.expect(Object.keys(pm.response.json()).length).to.be.at.least(1);",
+							"});",
+							"",
+							"pm.environment.set(\"next_boats\", pm.response.json()[\"next\"]);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{next_boats}}",
+					"host": [
+						"{{next_boats}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all boats page 3 200",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "aa70d31f-0dbf-4808-b8b8-4136524719bf",
+						"exec": [
+							"pm.test(\"200 status code\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"At least one boat exists\", function(){",
+							"   pm.expect(Object.keys(pm.response.json()).length).to.be.at.least(1);",
+							"});",
+							"",
+							"pm.test(\"This is the last page\", function(){",
+							"   pm.expect(pm.response.json()[\"next\"]).to.eql(undefined);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{next_boats}}",
+					"host": [
+						"{{next_boats}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "put root url 405",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cdf6ec93-b96e-40a6-8604-54a1e7f7cd38",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(405);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Method not allowed\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Aquila\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat 2 with same name as boat 1 403",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "69d17602-4e28-486f-bc7d-dc5e9566841d",
+						"exec": [
+							"",
+							"pm.test(\"403 status code\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});",
+							"",
+							"",
+							"pm.test(\"403 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Boat names must be unique\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Aquila\",\r\n  \"type\": \"Quinquereme\",\r\n  \"length\": 500\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat2_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat2_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat with missing attributes 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8d328ccc-92ee-4b48-9824-5cca334d7bef",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The request object is missing at least one of the required attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Aquila2\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat with extra attributes 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c767647a-ed3c-489d-9d44-453d26425424",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Unrecognized attributes in request\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Aquila2\",\r\n  \"type\": \"Navis\",\r\n  \"extra\": \"attribute\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat with bad attribute 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "497f078e-4cb7-4047-99f8-e1521fb522ca",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"The request object is missing at least one of the required attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Aquila2\",\r\n  \"type\": \"Navis\",\r\n  \"bad\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat with special characters in name 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "07ef2eae-2007-4a7a-b4fb-d3c00b4ae374",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Invalid data for at least one of the required attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"name\": \"Senec@\",\r\n  \"type\": \"Navis\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat with name too long 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a07d6aae-2887-47ad-a188-74c765ca3b9e",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Invalid data for at least one of the required attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"name\": \"Lorem ipsum dolor sit amet  consectetur adipiscing elit  Nam faucibus lectus nec eros interdum pharetra  In egestas odio ex  non pharetra massa hendrerit non  Orci varius natoque penatibus et magnis dis parturient montes  nascetur ridiculus mus  Duis orci \",\r\n  \"type\": \"Navis\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat with name too short 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "319b1e8c-6735-4265-90c0-5e013f195bb2",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Invalid data for at least one of the required attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"name\": \"fi\",\r\n  \"type\": \"Navis\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat with type too long 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "61966a78-c07d-429c-9170-a4777f0ed636",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Invalid data for at least one of the required attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"name\": \"Seneca\",\r\n  \"type\": \"Lorem ipsum dolor sit amet  consectetur adipiscing elit  Nam faucibus lectus nec eros interdum pharetra  In egestas odio ex  non pharetra massa hendrerit non  Orci varius natoque penatibus et magnis dis parturient montes  nascetur ridiculus mus  Duis orci \",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat with type too short 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "aeca3263-49d8-4fc4-8ee7-1e646bdb7768",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Invalid data for at least one of the required attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"name\": \"Seneca\",\r\n  \"type\": \"fi\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat with special characters in type 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c18bae53-4a5c-4d03-b5d6-7bb8df5ba996",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Invalid data for at least one of the required attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"name\": \"Seneca\",\r\n  \"type\": \"Nav!s\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat with too long length 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "50bbf042-d41d-4012-a2f1-06098bfb09fe",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Invalid data for at least one of the required attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"name\": \"Seneca\",\r\n  \"type\": \"Navis\",\r\n  \"length\": 10000\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat with invalid id 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0e26905-9a97-4125-8736-2c54e84fc8ca",
+						"exec": [
+							"pm.test(\"400 status\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Invalid id\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Odyssey II\",\r\n   \"type\": \"Mega Yatch\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/abc",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"abc"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat id 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1f56e23e-5f4a-4401-ad0c-6abc3b52f330",
+						"exec": [
+							"pm.test(\"400 status\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\":123,\r\n  \"name\": \"Aquila2\",\r\n  \"type\": \"Quinquereme\",\r\n  \"length\": 100\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat 303",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e18e88f2-09f0-4fd1-b38f-2885d9d5313a",
+						"exec": [
+							"pm.test(\"303 status code\", function () {",
+							"    pm.response.to.have.status(303);",
+							"});",
+							"",
+							"pm.test(\"check content header exists\", function () {",
+							"     pm.expect(responseHeaders.hasOwnProperty(\"Content-Type\")).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"content type is json\", function () {",
+							"     pm.expect(postman.getResponseHeader(\"Content-Type\")).eq('application/json');",
+							"});",
+							"",
+							"pm.test(\"location header matches self url\", function () {",
+							"    const self_url = pm.environment.get(\"app_url\") + \"/boats/\" + pm.response.json()[\"id\"];",
+							"     pm.expect(postman.getResponseHeader(\"Location\")).eq(self_url);",
+							"});",
+							"",
+							"pm.test(\"content is valid\", function () {",
+							"    pm.expect(pm.response.json()[\"name\"]).to.eq(\"Seneca\");",
+							"    pm.expect(pm.response.json()[\"type\"]).to.eq(\"Navis\");",
+							"    pm.expect(pm.response.json()[\"length\"]).to.eq(200);",
+							"    const self_url = pm.environment.get(\"app_url\") + \"/boats/\" + pm.response.json()[\"id\"];",
+							"    pm.expect(pm.response.json()[\"self\"]).to.eq(self_url);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Seneca\",\r\n  \"type\": \"Navis\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "patch root url 405",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d2c4a4ac-b2cd-43e7-91e9-7b0614fca78a",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(405);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Method not allowed\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Seneca\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat 2 with same name as boat 1 403 Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1f9c7e35-3795-46c5-896a-a7dbfc29f647",
+						"exec": [
+							"",
+							"pm.test(\"403 status code\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});",
+							"",
+							"",
+							"pm.test(\"403 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Boat names must be unique\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Seneca\",\r\n  \"type\": \"Quinquereme\",\r\n  \"length\": 500\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat2_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat2_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat id 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "86f8e2e3-5c58-469e-89fd-b5b93ddc2325",
+						"exec": [
+							"pm.test(\"400 status\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\":123\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat with extra attributes 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "63db196a-170a-4c9c-a9d1-b1abbb4d3a92",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Unrecognized attributes in request\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Aquila\",\r\n  \"type\": \"Navis\",\r\n  \"extra\": \"attribute\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat with bad attribute 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0da39ce-1522-4fd1-b16c-5ce48e5d88bf",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Unrecognized attributes in request\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Aquila\",\r\n  \"type\": \"Navis\",\r\n  \"bad\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat with special characters in name 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9e442bb2-7fba-43dc-8db6-a59d863c8589",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Invalid data for at least one of the required attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"name\": \"Senec@\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat with name too long 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "68c96b9f-ba29-4ee4-a587-307f929b4803",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Invalid data for at least one of the required attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"name\": \"Lorem ipsum dolor sit amet  consectetur adipiscing elit  Nam faucibus lectus nec eros interdum pharetra  In egestas odio ex  non pharetra massa hendrerit non  Orci varius natoque penatibus et magnis dis parturient montes  nascetur ridiculus mus  Duis orci \"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat with name too short 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8da34d4a-8fcb-4297-a460-55e67aa92a90",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Invalid data for at least one of the required attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"name\": \"fi\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat with type too long 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8f6ad8a9-cac7-4f2d-b83b-43b3253dac81",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Invalid data for at least one of the required attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"type\": \"Lorem ipsum dolor sit amet  consectetur adipiscing elit  Nam faucibus lectus nec eros interdum pharetra  In egestas odio ex  non pharetra massa hendrerit non  Orci varius natoque penatibus et magnis dis parturient montes  nascetur ridiculus mus  Duis orci \"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat with special characters in type 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "71bc6c28-45ec-4a0a-b1f3-601cada93bd3",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Invalid data for at least one of the required attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"type\": \"Nav!s\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat with too long length 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "dc1fb280-d217-4a65-9eb6-367ade94ced1",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Invalid data for at least one of the required attributes\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"length\": 10000\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat with invalid id 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c974288b-8e70-47e2-805e-5d64fd7434ff",
+						"exec": [
+							"pm.test(\"400 status\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Invalid id\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Odyssey II\",\r\n  \"type\": \"Mega Yatch\",\r\n  \"length\": 200\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/abc",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"abc"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat name and type 201",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9b3e69e4-5157-49ca-aa83-c43a4cd2ac05",
+						"exec": [
+							"pm.test(\"200 status code\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"check content header exists\", function () {",
+							"     pm.expect(responseHeaders.hasOwnProperty(\"Content-Type\")).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"content type is json\", function () {",
+							"     pm.expect(postman.getResponseHeader(\"Content-Type\")).eq('application/json');",
+							"});",
+							"",
+							"pm.test(\"content is valid\", function () {",
+							"    pm.expect(pm.response.json()[\"name\"]).to.eq(\"SenecaPatch\");",
+							"    pm.expect(pm.response.json()[\"type\"]).to.eq(\"NavisPatch\");",
+							"    const self_url = pm.environment.get(\"app_url\") + \"/boats/\" + pm.response.json()[\"id\"];",
+							"    pm.expect(pm.response.json()[\"self\"]).to.eq(self_url);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"SenecaPatch\",\r\n  \"type\": \"NavisPatch\"\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit boat length 201",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "be0d0030-b18b-45f2-a5ba-52e1516c115e",
+						"exec": [
+							"pm.test(\"200 status code\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"check content header exists\", function () {",
+							"     pm.expect(responseHeaders.hasOwnProperty(\"Content-Type\")).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"content type is json\", function () {",
+							"     pm.expect(postman.getResponseHeader(\"Content-Type\")).eq('application/json');",
+							"});",
+							"",
+							"pm.test(\"content is valid\", function () {",
+							"    pm.expect(pm.response.json()[\"length\"]).to.eq(999);",
+							"    const self_url = pm.environment.get(\"app_url\") + \"/boats/\" + pm.response.json()[\"id\"];",
+							"    pm.expect(pm.response.json()[\"self\"]).to.eq(self_url);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"length\": 999\r\n}"
+				},
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete root url 405",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "71dca69a-f225-490f-b293-41e267ea79cf",
+						"exec": [
+							"pm.test(\"400 status code\", function () {",
+							"    pm.response.to.have.status(405);",
+							"});",
+							"",
+							"pm.test(\"400 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Method not allowed\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete boat with invalid id 403",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8a8f8a52-397a-41e1-8626-7cf42eecc12d",
+						"exec": [
+							"pm.test(\"403 forbidden\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});",
+							"",
+							"",
+							"pm.test(\"403 error message\", function () {",
+							"     pm.expect(pm.response.json()[\"Error\"]).to.eq(\"Invalid id\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/boats/abc",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"abc"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete boat_1 204",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "5718114c-31a0-451a-b945-4e6ce69d8435",
+						"exec": [
+							"pm.test(\"204 no content\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat1_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat1_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete boat_2 204",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "b6c997e8-58bf-4a85-8564-22e100c1671d",
+						"exec": [
+							"pm.test(\"204 no content\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat2_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat2_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete boat_3 204",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9a05cda9-4e30-4c89-96df-3876abd7db65",
+						"exec": [
+							"pm.test(\"204 no content\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat3_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat3_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete boat_4 204",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "75b694d6-3dc4-4cf3-aa45-83a76b1a9fb2",
+						"exec": [
+							"pm.test(\"204 no content\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat4_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat4_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete boat_5 204",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "60b29cb5-45e7-4f71-a28c-9cc21604e09e",
+						"exec": [
+							"pm.test(\"204 no content\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat5_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat5_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete boat_6 204",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0c94674e-7c5a-40c7-ac1c-c3ffef416d7c",
+						"exec": [
+							"pm.test(\"204 no content\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat6_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat6_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete boat_7 204",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "eab9b29e-d467-4ee6-a7b3-202d5daf5805",
+						"exec": [
+							"pm.test(\"204 no content\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/boats/{{boat7_id}}",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats",
+						"{{boat7_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all boats check none 200",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7bd66bfc-9cc8-4e63-97e8-ba802ff1ff46",
+						"exec": [
+							"pm.test(\"200 status code\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"No boat exists\", function(){",
+							"   pm.expect(Object.keys(pm.response.json()).length).to.be.at.least(0);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/boats",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"boats"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "6ffcd5ee-916f-4c66-a860-7b48d2ce8949",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "00a0ae09-ca04-471b-bc4d-eadf87d024cb",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"protocolProfileBehavior": {}
+}

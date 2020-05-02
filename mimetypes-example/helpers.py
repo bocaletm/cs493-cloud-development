@@ -107,3 +107,8 @@ class CustomResponse:
 
     def contentResponse(self,status,content):
         return Response(json.dumps(content, sort_keys=True, indent=4),status=status, mimetype='application/json')
+
+    def redirect(self,location):
+        response = Response(status=301)
+        response.headers['Location'] = location
+        return response
