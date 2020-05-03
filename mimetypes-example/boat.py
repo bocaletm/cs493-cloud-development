@@ -168,7 +168,7 @@ def getBoat(boat_id):
     if 'application/json' not in request.accept_mimetypes and 'text/html' not in request.accept_mimetypes:
         return R.errorResponse(406,'Unsupported mimetype in request')
     if V.badInt(boat_id):
-        return R.errorResponse(403,C.NO_ID)
+        return R.errorResponse(400,C.NO_ID)
     boat = get_boat(boat_id, request.base_url) 
     if boat is not None:
         print(boat)
