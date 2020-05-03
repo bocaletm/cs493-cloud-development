@@ -231,7 +231,7 @@ def patchBoat(boat_id):
 @bp.route('/<string:boat_id>', strict_slashes=False, methods=['DELETE'])
 def deleteBoat(boat_id):
     if V.badInt(boat_id):
-        return R.errorResponse(403,C.NO_ID)
+        return R.errorResponse(400,C.NO_ID)
     return R.codeResponse(delete_boat(boat_id,request.base_url))
 
 @bp.route('/', methods=['GET'])
