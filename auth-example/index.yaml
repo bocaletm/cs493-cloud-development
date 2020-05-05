@@ -1,0 +1,13 @@
+indexes:
+
+- kind: visit
+  ancestor: yes
+  properties:
+  - name: timestamp
+    direction: desc
+
+- kind: todo
+  ancestor: yes
+  properties:
+  - name: checked
+  - name: title

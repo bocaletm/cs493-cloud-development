@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+<head>
+  <title>User Info</title>
+  <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>   
+    <h1>User Info</h1>
+
+    <div class="userdata">
+        {% if user_data %}  
+        <dt>Name:</dt><dd>{{ user_data['name'] }}</dd>
+        <dt>Email:</dt><dd>{{ user_data['email'] }}</dd>
+        {% elif error_message %}    
+        <dt>Error:</dt> <dd>{{ error_message }}</dd>
+        {% endif %}
+        </dl>
+    </div>
+</body> 
+</html>
