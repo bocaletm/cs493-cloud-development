@@ -1,14 +1,27 @@
-<!doctype html>
-<html>
-<head>
-  <title>Welcome</title>
-  <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>   
+{% extends "base.html" %}
+{% block title %}Welcome{% endblock %}
 
-<h1>Welcome!</h1>
-<h2>Authenticate With Google Below</h2>
+{% block navbar %}
+<div class="navbar navbar-fixed-top">
+  <!-- ... -->
+</div>
+{% endblock %}
 
-
-</body>
-</html>
+{% block content %}
+  <h1>Welcome!</h1>
+  <div class='container'></div>
+  <h1></h1>
+  {% if error %}  
+    <p>Authentication error: {{ error }}</p>
+    <p>Please try again.</p>
+  {% endif %}
+  <h2>Sign in to Google below, and I will guess your name.</h2>
+  </br>
+  <div class="text-center"> 
+    <button type="button" class="btn btn-success" id="sign-in">Sign In</button>
+  </div>
+</div>
+{% endblock %}
+<!-- 
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> -->

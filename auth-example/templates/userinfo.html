@@ -1,20 +1,23 @@
-<!doctype html>
-<html>
-<head>
-  <title>User Info</title>
-  <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>   
-    <h1>User Info</h1>
+{% extends "base.html" %}
+{% block title %}User{% endblock %}
 
-    <div class="userdata">
-        {% if user_data %}  
-        <dt>Name:</dt><dd>{{ user_data['name'] }}</dd>
-        <dt>Email:</dt><dd>{{ user_data['email'] }}</dd>
-        {% elif error_message %}    
-        <dt>Error:</dt> <dd>{{ error_message }}</dd>
-        {% endif %}
-        </dl>
-    </div>
-</body> 
-</html>
+{% block navbar %}
+<div class="navbar navbar-fixed-top">
+  <!-- ... -->
+</div>
+{% endblock %}
+
+{% block content %}
+  <h1>Hmmm...</h1>
+
+  <div class="text-center"> 
+    {% if name %}  
+      <h3>You look like a {{ name }}</h3>
+    {% endif %}
+    {% if trick %}
+      <div class="alert alert-danger" role="alert">
+        <strong>{{ trick }}</strong>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}
