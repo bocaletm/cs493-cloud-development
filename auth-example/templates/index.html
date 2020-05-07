@@ -10,10 +10,11 @@
 {% block content %}
   <h1>Welcome!</h1>
   <div class='container'></div>
-  <h1></h1>
+
   {% if error %}  
-    <p>Authentication error: {{ error }}</p>
-    <p>Please try again.</p>
+    <div class="alert alert-danger" role="alert">
+      <p><strong>Authentication error: {{ error }}</strong></p>
+    </div>
   {% endif %}
   <h2>Sign in to Google below, and I will guess your name.</h2>
   </br>

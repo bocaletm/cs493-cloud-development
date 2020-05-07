@@ -14,6 +14,9 @@
     {% if name %}  
       <h3>You look like a {{ name }}</h3>
     {% endif %}
+    {% if state %}  
+    <h3>State variable: {{ state }}</h3>
+    {% endif %}
     {% if trick %}
       <div class="alert alert-danger" role="alert">
         <strong>{{ trick }}</strong>

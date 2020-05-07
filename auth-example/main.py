@@ -10,17 +10,14 @@ app.secret_key = environ.get('FLASK_SECRET_KEY')
 
 Bootstrap(app)
 
+stateError = 'Could not verify auth server response'
 clientID = environ.get('GCLOUD_CLIENT_ID')
 clientSecret = environ.get('GCLOUD_CLIENT_SECRET')
-userUri = 'http://localhost:8080/user'
-selfAuthUri = 'http://localhost:8080/auth'
 scopes = 'https://www.googleapis.com/auth/userinfo.profile'
 authBaseUrl = 'https://accounts.google.com/o/oauth2/v2/auth'
 tokenBaseUrl = 'https://oauth2.googleapis.com/token'
-authUrl = authBaseUrl + '?' + 'client_id=' + clientID + '&redirect_uri=' + \
-    selfAuthUri + '&response_type=code' + '&scope=' + scopes
-tokenUrl = tokenBaseUrl + '?' + 'client_id=' + clientID + '&client_secret=' + clientSecret + '&redirect_uri=' + \
-    selfAuthUri + '&grant_type=authorization_code'
+googleAuthUrl = authBaseUrl + '?' + 'client_id=' + clientID + '&response_type=code' + '&scope=' + scopes
+tokenUrl = tokenBaseUrl + '?' + 'client_id=' + clientID + '&client_secret=' + clientSecret + '&grant_type=authorization_code'
     
 namesEmailsUrl = 'https://people.googleapis.com/v1/people/me?personFields=names,emailAddresses'
 
@@ -32,11 +29,10 @@ def saveSession(name):
     session['name'] = name
     session['token'] = token
     session['time'] = epoch_time
-    print(name + epoch_time)
     VERIFY_SESSION[name + epoch_time] = token
 
 def getToken(code):
-    tokenUrlWithCode = tokenUrl + '&code=' + code
+    tokenUrlWithCode = tokenUrl + '&redirect_uri=' + request.base_url + '&code=' + code
     res = requests.post(tokenUrlWithCode)
     content = res.json()
     return content['access_token']
@@ -44,9 +40,8 @@ def getToken(code):
 @app.route('/user')
 def user():
     sessionKey = session.get('name','none') + session.get('time','none')
-    print(sessionKey)
-    if session.get('name','') and session.get('token','cookie') == VERIFY_SESSION.get(sessionKey,'saved'):
-        return render_template('userinfo.html',name=session.get('name'))
+    if session.get('name','') and session.get('token','session') == VERIFY_SESSION.get(sessionKey,'saved'):
+        return render_template('userinfo.html',name=session.get('name'),state=session.get('state',''))
     elif session.get('name',''): 
         return render_template('userinfo.html',trick='You\'re trying to trick me. Shame on you!')
     else:
@@ -54,7 +49,7 @@ def user():
 
 @app.route('/auth')
 def auth():
-    if request.args.get('code', ''): 
+    if request.args.get('code', '') and request.args.get('state', '') and session.get('state','') and request.args.get('state') == session.get('state'): 
         token = getToken(request.args.get('code', ''))
 
         res = requests.get(
@@ -65,16 +60,15 @@ def auth():
         )
         names = res.json()['names'][0]
         name = names.get('displayName')
-
         saveSession(name)
-
         return redirect(url_for('user'))
-
     elif request.args.get('error', ''):
         error = request.args.get('error', '')
         return redirect(url_for('root',error=error))
     else:
-        return redirect(authUrl)
+        print('setting state ' + session['state'])
+        session['state'] = secrets.token_urlsafe(16)
+        return redirect(googleAuthUrl + '&redirect_uri=' + request.base_url + '&state=' + session['state'])
 
 @app.route('/')
 def root():
