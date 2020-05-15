@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Welcome{% endblock %}
+
+{% block navbar %}
+  <div class="navbar navbar-fixed-top">
+    <!-- ... -->
+  </div>
+{% endblock %}
+
+{% block content %}
+  <h1>Welcome!</h1>
+  <div class='container'></div>
+
+  {% if error %}  
+    <div class="alert alert-danger" role="alert">
+      <p><strong>Authentication error: {{ error }}</strong></p>
+    </div>
+  {% endif %}
+{% if url %}  
+  <h2>Sign in to Google below to get a token for the API.</h2>
+  </br>
+  <div class="text-center"> 
+    <button type="button" class="btn btn-success" id="sign-in" onclick="window.location.href='{{url}}'">Sign In</button>
+  </div>
+{% endif %}
+{% if jwt %}  
+  <h2>See your JWT token below.</h2>
+  </br>
+  
+  <div class="row">
+    <div class="col-md-8 col-md-offset-2">
+      <div class="panel panel-info">
+        <div class="panel-heading">Token for {{email}}</div>
+        <div class="panel-body" style="overflow-x: scroll; overflow-y: scroll;">{{jwt}}</div>
+      </div>
+    </div>
+  </div>
+
+{% endif %}
+</div>
+{% endblock %}

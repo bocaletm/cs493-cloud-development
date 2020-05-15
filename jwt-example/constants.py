@@ -1,0 +1,30 @@
+class Constants:
+    NO_ID = 'Invalid id'
+    NO_ID_BOAT = 'No boat with this boat_id exists'
+    INCOMPLETE = 'The request object is missing at least one of the required attributes'
+    INVALID_DATA = 'Invalid data for at least one of the required attributes'
+    ID_UPDATE = 'Cannot set id attribute'
+    EXTRA_ATTRIBUTES = 'Unrecognized attributes in request'
+    NOT_UNIQUE = 'Boat names must be unique'
+    TOKEN_UNAUTHORIZED = 'Token not authorized to modify boat'
+    NOT_EXISTS = 'does not exist'
+    BAD_METHOD = 'Method not allowed'
+    MIME_ERR = 'Unsupported mimetype in request'
+    BEARER_ERR = 'Bearer token malformed'
+    INVALID_TOKEN = 'Invalid token'
+    NO_TOKEN = 'Missing token'
+    UNKNOWN_AUTH = 'Unknown authorization error'
+    ID_MISMATCH = 'The owner_id does not match the id in the token'
+    DOCUMENTATION = ''
+    limit = 100
+    maxBoatLength = 1600
+    minBoatLength = 10
+    minStringLength = 3
+    maxNameLength = 255
+    maxTypeLength = 255
+    NUM_BOAT_ATTRIBUTES = 3
+    validChars = '^[a-zA-Z0-9 ]+$'
+    kind = 'Boat'
+    AUTH_SCOPES = ['https://www.googleapis.com/auth/userinfo.email', 'openid',
+             'https://www.googleapis.com/auth/userinfo.profile']
+    AUTH_ISSUER = 'accounts.google.com'
