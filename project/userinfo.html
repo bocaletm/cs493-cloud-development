@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}User{% endblock %}
+
+{% block navbar %}
+<div class="navbar navbar-fixed-top">
+  <!-- ... -->
+</div>
+{% endblock %}
+
+{% block content %}
+  <h1>Hmmm...</h1>
+
+  <div class="text-center"> 
+    {% if name %}  
+      <h3>You look like a {{ name }}</h3>
+    {% endif %}
+    {% if state %}  
+    <h3>State variable: {{ state }}</h3>
+    {% endif %}
+    {% if trick %}
+      <div class="alert alert-danger" role="alert">
+        <strong>{{ trick }}</strong>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}
