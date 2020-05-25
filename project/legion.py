@@ -7,6 +7,14 @@ datastore_client = datastore.Client()
 class Legion:
     _unit = Unit()
 
+    def legionFromUnit(self,unit_id):
+        query = datastore_client.query(kind=C.kindB)
+        query.add_filter('units', '=', unit_id)
+        entities = query.fetch()
+        for entity in entities:
+            return entity.key.id_or_name
+        return None
+
     def exists(self, id):
         query = datastore_client.query(kind=C.kindB)
         query.keys_only()
@@ -21,7 +29,7 @@ class Legion:
         query.key_filter(key)
         entities = query.fetch()
         for entity in entities:
-            return entity['owner']
+            return entity.get('owner',-1)
         return -1
 
     def store(self, name, level, terrainBonus, userId):
@@ -71,10 +79,10 @@ class Legion:
         query.key_filter(key)
         entities = query.fetch()
         for entity in entities:
-            units = entity.get('units',[])
-            units.append(unitId)
+            units = set(entity.get('units',[]))
+            units.add(unitId)
             entity.update({
-                "units": units,
+                "units": list(units),
             })
             datastore_client.put(entity)
             return entity    
@@ -94,7 +102,7 @@ class Legion:
             datastore_client.put(entity)
             return entity    
         return None
-
+    
     def get(self,request,userId):
         limit = C.limit
         offset = int(request.args.get('offset', '0'))

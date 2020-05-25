@@ -54,7 +54,7 @@ def delete(id):
 
     if legion.getOwner(id) != userId:
         return R.errorResponse(403,C.TOKEN_UNAUTHORIZED + ' ' + id)
-        
+    
     return R.codeResponse(legion.delete(id))
 
 @bp.route('', strict_slashes=False, methods=['GET'])

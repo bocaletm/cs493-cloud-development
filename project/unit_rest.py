@@ -1,3 +1,4 @@
+from legion_rest import legion
 from flask import Blueprint, request, Response
 from json2html import *
 from constants import Constants as C
@@ -54,6 +55,11 @@ def delete(id):
     if unit.getOwner(id) != userId:
         return R.errorResponse(403,C.TOKEN_UNAUTHORIZED + ' ' + id)
         
+    legion_id = legion.legionFromUnit(id)
+
+    if legion_id != None:
+        legion.deleteUnit(legion_id,id)
+
     return R.codeResponse(unit.delete(id))
 
 @bp.route('', strict_slashes=False, methods=['GET'])
