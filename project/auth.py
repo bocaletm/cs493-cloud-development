@@ -8,6 +8,7 @@ from google.auth import crypt
 from google.auth import jwt
 from google.auth.transport import requests
 from constants import Constants as C
+from user import User
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 datastore_client = datastore.Client()
@@ -20,6 +21,8 @@ redirect_uri = environ.get("OAUTH_REDIRECT")
 
 scope = C.AUTH_SCOPES
 oauth = OAuth2Session(client_id, redirect_uri=redirect_uri,scope=scope)
+
+user = User()
 
 @bp.route('', strict_slashes=False)
 def authRoute():
@@ -42,8 +45,10 @@ def oauthRoute():
 
         id_info = id_token.verify_oauth2_token(token['id_token'], req, client_id)
         email = id_info['email']
+        user_id = ['sub']
         jwt = token['id_token']
-    except:
-        error = 'Unable to obtain token'
-        return render_template('index.html',error=error)
+        if user.conditionalCreate(user_id) == -1:
+            raise Exception('User creation error')
+    except Exception as err:
+        return render_template('index.html',error=err)
     return render_template('index.html',email=email,jwt=jwt)

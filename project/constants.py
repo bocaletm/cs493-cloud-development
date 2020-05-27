@@ -18,6 +18,7 @@ class Constants:
     minStringLength = 3
     maxNameLength = 255
     maxCategoryLength = 255
+    startingBudget = 1000
     NUM_KINDA_ATTRIBUTES = 4
     NUM_KINDB_ATTRIBUTES = 3
     validChars = '^[a-zA-Z0-9 ]+$'
@@ -25,6 +26,8 @@ class Constants:
     kindAGen = 'units'
     kindB = 'Legion'
     kindBGen = 'legions'
+    kindC = 'User'
+    kindCGen = 'users'
     AUTH_SCOPES = ['https://www.googleapis.com/auth/userinfo.email', 'openid',
              'https://www.googleapis.com/auth/userinfo.profile']
     AUTH_ISSUER = 'accounts.google.com'
