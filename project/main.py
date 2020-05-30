@@ -4,12 +4,16 @@ from google.cloud import datastore
 import auth
 import legion_rest
 import unit_rest
+import user_rest
 from constants import Constants as C
 
 app = Flask(__name__)
+
 app.register_blueprint(auth.bp)
-app.register_blueprint(unit_rest.bp)
 app.register_blueprint(legion_rest.bp)
+app.register_blueprint(unit_rest.bp)
+app.register_blueprint(user_rest.bp)
+
 Bootstrap(app)
 
 datastore_client = datastore.Client()

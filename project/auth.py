@@ -45,7 +45,7 @@ def oauthRoute():
 
         id_info = id_token.verify_oauth2_token(token['id_token'], req, client_id)
         email = id_info['email']
-        user_id = ['sub']
+        user_id = id_info['sub']
         jwt = token['id_token']
         if user.conditionalCreate(user_id) == -1:
             raise Exception('User creation error')

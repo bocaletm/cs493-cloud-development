@@ -15,6 +15,16 @@ class Legion:
             return entity.key.id_or_name
         return None
 
+    def count(self,userId):
+        query = datastore_client.query(kind=C.kindB)
+        query.add_filter('owner', '=', userId)
+        query.keys_only()
+        entities = query.fetch()
+        count = 0
+        for entity in entities:
+            count+=1
+        return count
+
     def exists(self, id):
         query = datastore_client.query(kind=C.kindB)
         query.keys_only()
@@ -31,6 +41,21 @@ class Legion:
         for entity in entities:
             return entity.get('owner',-1)
         return -1
+
+    def getOne(self,request,id):
+        query = datastore_client.query(kind=C.kindB)
+        key = datastore_client.key(C.kindB, int(id))
+        query.key_filter(key)
+        entities = query.fetch()
+        for entity in entities:
+            if request.base_url.find(str(entity.key.id_or_name)) > -1:
+                selfUri = request.base_url
+            else:
+                selfUri = request.base_url + '/' + str(entity.key.id_or_name)
+            entity.update({"self":selfUri})
+            entity.update({"id":entity.key.id_or_name})
+            return entity
+        return None
 
     def store(self, name, level, terrainBonus, userId):
         key = datastore_client.key(C.kindB)
@@ -119,13 +144,14 @@ class Legion:
             print('Failed to fetch ' + C.kindB)
         for entity in entities:
             entity.update({"id":entity.key.id_or_name})
+            selfUri = request.base_url + '/' + str(entity.key.id_or_name)
+            entity.update({"self":selfUri})
             if iterator.next_page_token:
-                nextUri = request.base_uri + '?offset=' + str(offset + limit)
-                entity.update({"next":nextUri})
+                nextUri = request.base_url + '?offset=' + str(offset + limit)
         if nextUri is not None:
-            response = {C.kindBGen:entities,"next":nextUri}
+            response = {C.kindBGen:entities,"count":self.count(userId),"next":nextUri}
         else:
-            response = {C.kindBGen:entities}
+            response = {C.kindBGen:entities,"count":self.count(userId)}
         return response
 
     def getSubentities(self,request,id):
@@ -139,7 +165,9 @@ class Legion:
         for entity in entities:
             subEntityIDs = entity['units']
             for id in subEntityIDs:
-                subEntity = self._unit.getOne(id)
+                head, part, tail = request.base_url.partition('/legions')
+                request.base_url = (head + '/units')
+                subEntity = self._unit.getOne(request,id)
                 subEntity.update({"id":id})
                 subEntities.append(subEntity)
             response = {C.kindAGen:subEntities}

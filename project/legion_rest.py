@@ -190,3 +190,25 @@ def deleteUnit(legion_id,unit_id):
         return R.codeResponse(204)
     else:
         return R.errorResponse(404,C.ENTITY_NOT_FOUND)
+
+@bp.route('/<string:id>', strict_slashes=False, methods=['GET'])
+def get_one(id):
+    if 'application/json' not in request.accept_mimetypes:
+        return R.errorResponse(406, C.MIME_ERR)
+    
+    authResult = A.checkAuthHeader(request.headers.get('Authorization'))
+    if isinstance(authResult, Response):
+        return authResult
+
+    userId = authResult
+
+    entity = legion.getOne(request,id)
+
+    if entity == None:
+        return R.errorResponse(404,C.ENTITY_NOT_FOUND)
+    elif entity['owner'] != userId:
+        return R.errorResponse(403,C.ID_MISMATCH)
+
+    status = 200 if entity is not None else 500 
+    print(entity)
+    return R.contentResponse(status,entity)

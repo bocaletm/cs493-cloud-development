@@ -7,6 +7,16 @@ class Unit:
     def __getCost(self, strength, targetRange): 
         return strength * targetRange
 
+    def count(self,userId):
+        query = datastore_client.query(kind=C.kindA)
+        query.add_filter('owner', '=', userId)
+        query.keys_only()
+        entities = query.fetch()
+        count = 0
+        for entity in entities:
+            count+=1
+        return count
+
     def exists(self, id):
         query = datastore_client.query(kind=C.kindA)
         query.keys_only()
@@ -15,14 +25,20 @@ class Unit:
             return True
         return False
     
-    def getOne(self,id):
+    def getOne(self,request,id):
         query = datastore_client.query(kind=C.kindA)
         key = datastore_client.key(C.kindA, int(id))
         query.key_filter(key)
         entities = query.fetch()
         for entity in entities:
+            if request.base_url.find(str(entity.key.id_or_name)) > -1:
+                selfUri = request.base_url
+            else:
+                selfUri = request.base_url + '/' + str(entity.key.id_or_name)
+            entity.update({"self":selfUri})
+            entity.update({"id":entity.key.id_or_name})
             return entity
-        return -1
+        return None
 
     def getOwner(self,id):
         query = datastore_client.query(kind=C.kindA)
@@ -93,11 +109,12 @@ class Unit:
             print('Failed to fetch ' + C.kindA)
         for entity in entities:
             entity.update({"id":entity.key.id_or_name})
+            selfUri = request.base_url + '/' + str(entity.key.id_or_name)
+            entity.update({"self":selfUri})
             if iterator.next_page_token:
                 nextUri = request.base_url + '?offset=' + str(offset + limit)
-                entity.update({"next":nextUri})
         if nextUri is not None:
-            response = {C.kindAGen:entities,"next":nextUri}
+            response = {C.kindAGen:entities,"count":self.count(userId),"next":nextUri}
         else:
-            response = {C.kindAGen:entities}
+            response = {C.kindAGen:entities,"count":self.count(userId)}
         return response
