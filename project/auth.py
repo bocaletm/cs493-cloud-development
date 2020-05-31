@@ -47,8 +47,12 @@ def oauthRoute():
         email = id_info['email']
         user_id = id_info['sub']
         jwt = token['id_token']
-        if user.conditionalCreate(user_id) == -1:
+        firstLogin = False
+        accountStatus = user.conditionalCreate(user_id)
+        if accountStatus == -1:
             raise Exception('User creation error')
+        elif accountStatus == 2:
+            firstLogin = True
     except Exception as err:
         return render_template('index.html',error=err)
-    return render_template('index.html',email=email,jwt=jwt)
+    return render_template('index.html',email=email,user_id=user_id,jwt=jwt,firstLogin=firstLogin)

@@ -65,7 +65,7 @@ class User:
         })
         try: 
             datastore_client.put(entity)
-            return 1
+            return 2
         except Exception as err: 
             print(err)
             return -1
