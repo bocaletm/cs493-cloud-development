@@ -7,6 +7,17 @@ datastore_client = datastore.Client()
 class Legion:
     _unit = Unit()
 
+    def removeUnits(self,id):
+        query = datastore_client.query(kind=C.kindB)
+        key = datastore_client.key(C.kindB, int(id))
+        query.key_filter(key)
+        entities = query.fetch()
+        subEntityIDs = None
+        for entity in entities:
+            subEntityIDs = entity[C.kindAGen]
+            for subId in subEntityIDs:
+                self._unit.remove(subId)
+
     def legionFromUnit(self,unit_id):
         query = datastore_client.query(kind=C.kindB)
         query.add_filter('units', '=', unit_id)
@@ -77,6 +88,7 @@ class Legion:
     def delete(self,id):
         key = datastore_client.key(C.kindB, int(id))
         if datastore_client.get(key) is not None:
+            self.removeUnits(id)
             datastore_client.delete(key)
             return 204
         else:
@@ -106,6 +118,7 @@ class Legion:
         for entity in entities:
             units = set(entity.get('units',[]))
             units.add(unitId)
+            self._unit.put(id,unitId)
             entity.update({
                 "units": list(units),
             })
@@ -120,6 +133,7 @@ class Legion:
         entities = query.fetch()
         for entity in entities:
             units = entity.get('units',[])
+            self._unit.remove(unitId)
             units.remove(unitId)
             entity.update({
                 "units": units,

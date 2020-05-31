@@ -13,6 +13,7 @@ class Constants:
     NO_TOKEN = 'Missing token'
     UNKNOWN_AUTH = 'Unknown authorization error'
     ID_MISMATCH = 'The owner_id does not match the id in the token'
+    CANNOT_DELETE_UNIT = 'Cannot delete unit associated with a legion'
     DOCUMENTATION = ''
     limit = 5
     minStringLength = 3

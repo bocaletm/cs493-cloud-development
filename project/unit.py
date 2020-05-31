@@ -7,6 +7,14 @@ class Unit:
     def __getCost(self, strength, targetRange): 
         return strength * targetRange
 
+    def getLegion(self,id):
+        query = datastore_client.query(kind=C.kindA)
+        key = datastore_client.key(C.kindA, int(id))
+        query.key_filter(key)
+        entities = query.fetch()
+        for entity in entities:   
+            return entity.get('legion',None)
+
     def count(self,userId):
         query = datastore_client.query(kind=C.kindA)
         query.add_filter('owner', '=', userId)
@@ -53,12 +61,13 @@ class Unit:
         key = datastore_client.key(C.kindA)
         entity = datastore.Entity(key=key)
         entity.update({
-            "name": name, 
-            "strength": strength, 
-            "targetRange": targetRange,             
             "category": category,
             "cost": self.__getCost(strength,targetRange),
+            "legion": None,
+            "name": name, 
             "owner": userId,
+            "strength": strength, 
+            "targetRange": targetRange,             
         })
         try: 
             datastore_client.put(entity)
@@ -118,3 +127,29 @@ class Unit:
         else:
             response = {C.kindAGen:entities,"count":self.count(userId)}
         return response
+
+    def put(self,legion_id,unit_id):
+        query = datastore_client.query(kind=C.kindA)
+        key = datastore_client.key(C.kindA, int(unit_id))
+        query.key_filter(key)
+        entities = query.fetch()
+        for entity in entities:
+            entity.update({
+                "legion": legion_id,
+            })
+            datastore_client.put(entity)
+            return entity    
+        return None
+
+    def remove(self,id):
+        query = datastore_client.query(kind=C.kindA)
+        key = datastore_client.key(C.kindA, int(id))
+        query.key_filter(key)
+        entities = query.fetch()
+        for entity in entities:
+            entity.update({
+                "legion": None,
+            })
+            datastore_client.put(entity)
+            return entity    
+        return None

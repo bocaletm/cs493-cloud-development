@@ -55,12 +55,12 @@ def delete(id):
     if unit.getOwner(id) != userId:
         return R.errorResponse(403,C.TOKEN_UNAUTHORIZED + ' ' + id)
         
-    legion_id = legion.legionFromUnit(id)
+    legion_id = unit.getLegion(id)
 
     if legion_id != None:
-        legion.deleteUnit(legion_id,id)
-
-    return R.codeResponse(unit.delete(id))
+        return R.errorResponse(403,C.CANNOT_DELETE_UNIT)        
+    else:
+        return R.codeResponse(unit.delete(id))
 
 @bp.route('', strict_slashes=False, methods=['GET'])
 def get():
