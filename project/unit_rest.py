@@ -52,6 +52,10 @@ def delete(id):
         return authResult
     userId = authResult
 
+
+    if not unit.exists(id):
+        return R.errorResponse(404,C.ENTITY_NOT_FOUND)
+
     if unit.getOwner(id) != userId:
         return R.errorResponse(403,C.TOKEN_UNAUTHORIZED + ' ' + id)
         
@@ -107,11 +111,13 @@ def put(unit_id):
     if V.badInt(unit_id):
         return R.errorResponse(400,C.NO_ID)
 
-
     authResult = A.checkAuthHeader(request.headers.get('Authorization'))
     if isinstance(authResult, Response):
         return authResult
     userId = authResult
+
+    if not unit.exists(unit_id):
+        return R.errorResponse(404,C.ENTITY_NOT_FOUND)
 
     if unit.getOwner(unit_id) != userId:
         return R.errorResponse(403,C.TOKEN_UNAUTHORIZED)
