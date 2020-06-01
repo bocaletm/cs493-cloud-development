@@ -44,7 +44,7 @@ def post():
         return R.errorResponse(500,'Unknown')
 
 @bp.route('', strict_slashes=False, methods=['DELETE'])
-def delete():
+def deleteAll():
     return R.errorResponse(405,C.INVALID_METHOD)
 
 @bp.route('/<string:id>', strict_slashes=False, methods=['DELETE'])

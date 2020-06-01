@@ -221,3 +221,7 @@ def get_one(id):
     status = 200 if entity is not None else 500 
     print(entity)
     return R.contentResponse(status,entity)
+
+@bp.route('', strict_slashes=False, methods=['DELETE'])
+def deleteAll():
+    return R.errorResponse(405,C.INVALID_METHOD)

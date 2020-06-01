@@ -22,3 +22,7 @@ def get():
     status = 200 if users is not None else 500 
     print(users)
     return R.contentResponse(status,users)
+
+@bp.route('', strict_slashes=False, methods=['DELETE'])
+def deleteAll():
+    return R.errorResponse(405,C.INVALID_METHOD)
