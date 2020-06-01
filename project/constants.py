@@ -1,5 +1,6 @@
 class Constants:
     NO_ID = 'Invalid id'
+    INVALID_METHOD = 'Method is not allowed'
     INCOMPLETE = 'The request object is missing at least one of the required attributes'
     INVALID_DATA = 'Invalid data for at least one of the required attributes'
     ID_UPDATE = 'Cannot set id attribute'

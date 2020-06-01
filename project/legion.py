@@ -38,6 +38,8 @@ class Legion:
 
     def exists(self, id):
         query = datastore_client.query(kind=C.kindB)
+        key = datastore_client.key(C.kindB, int(id))
+        query.key_filter(key)
         query.keys_only()
         entities = query.fetch()
         for entity in entities:

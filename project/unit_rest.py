@@ -38,10 +38,14 @@ def post():
         content.update({"id":id})
         content.update({"self": request.base_url + '/' + str(id)})
         content.update({"owner": userId })
-        content.update({"cost": unit.__getCost(content['strength'], content['targetRange']) })
+        content.update({"cost": unit.getCost(content['strength'], content['targetRange']) })
         return R.contentResponse(201,content)
     else:
         return R.errorResponse(500,'Unknown')
+
+@bp.route('', strict_slashes=False, methods=['DELETE'])
+def delete():
+    return R.errorResponse(405,C.INVALID_METHOD)
 
 @bp.route('/<string:id>', strict_slashes=False, methods=['DELETE'])
 def delete(id):

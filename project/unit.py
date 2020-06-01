@@ -4,7 +4,7 @@ from constants import Constants as C
 
 datastore_client = datastore.Client()
 class Unit:
-    def __getCost(self, strength, targetRange): 
+    def getCost(self, strength, targetRange): 
         return strength * targetRange
 
     def getLegion(self,id):
@@ -27,6 +27,8 @@ class Unit:
 
     def exists(self, id):
         query = datastore_client.query(kind=C.kindA)
+        key = datastore_client.key(C.kindA, int(id))
+        query.key_filter(key)
         query.keys_only()
         entities = query.fetch()
         for entity in entities:
@@ -62,7 +64,7 @@ class Unit:
         entity = datastore.Entity(key=key)
         entity.update({
             "category": category,
-            "cost": self.__getCost(strength,targetRange),
+            "cost": self.getCost(strength,targetRange),
             "legion": None,
             "name": name, 
             "owner": userId,
@@ -95,7 +97,7 @@ class Unit:
                 "strength": strength, 
                 "targetRange": targetRange,             
                 "category": category,
-                "cost": self.__getCost(strength,targetRange),
+                "cost": self.getCost(strength,targetRange),
                 "owner": userId,
             })
             datastore_client.put(entity)
