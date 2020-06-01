@@ -144,19 +144,20 @@ def put(legion_id):
 def putUnit(legion_id,unit_id):
     if 'application/json' not in request.accept_mimetypes:
         return R.errorResponse(406,C.MIME_ERR)
+
     if V.badInt(legion_id) or V.badInt(unit_id):
         return R.errorResponse(400,C.NO_ID)
-
-    authResult = A.checkAuthHeader(request.headers.get('Authorization'))
-    if isinstance(authResult, Response):
-        return authResult
-    userId = authResult
 
     if not unit.exists(unit_id):
         return R.errorResponse(404,C.ENTITY_NOT_FOUND)
     
     if not legion.exists(legion_id):
         return R.errorResponse(404,C.ENTITY_NOT_FOUND)
+
+    authResult = A.checkAuthHeader(request.headers.get('Authorization'))
+    if isinstance(authResult, Response):
+        return authResult
+    userId = authResult
 
     if legion.getOwner(legion_id) != userId:
         return R.errorResponse(403,C.TOKEN_UNAUTHORIZED)
