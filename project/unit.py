@@ -4,6 +4,14 @@ from constants import Constants as C
 
 datastore_client = datastore.Client()
 class Unit:
+    def unitFromLegion(self,legion_id):
+        query = datastore_client.query(kind=C.kindA)
+        query.add_filter('legion', '=', legion_id)
+        entities = query.fetch()
+        for entity in entities:
+            return entity.key.id_or_name
+        return None
+        
     def getCost(self, strength, targetRange): 
         return strength * targetRange
 

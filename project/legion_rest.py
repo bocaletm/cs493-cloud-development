@@ -154,6 +154,9 @@ def putUnit(legion_id,unit_id):
     if not legion.exists(legion_id):
         return R.errorResponse(404,C.ENTITY_NOT_FOUND)
 
+    if legion.legionFromUnit(unit_id) is not None:
+        return R.errorResponse(400,C.ALREADY_ASSIGNED)
+
     authResult = A.checkAuthHeader(request.headers.get('Authorization'))
     if isinstance(authResult, Response):
         return authResult
@@ -188,6 +191,9 @@ def deleteUnit(legion_id,unit_id):
     
     if not legion.exists(legion_id):
         return R.errorResponse(404,C.ENTITY_NOT_FOUND)
+
+    if str(legion.legionFromUnit(unit_id)) != legion_id or str(unit.unitFromLegion(legion_id)) != unit_id:
+        return R.errorResponse(404,C.RELATIONSHIP_NOT_FOUND)
 
     if legion.getOwner(legion_id) != userId:
         return R.errorResponse(403,C.TOKEN_UNAUTHORIZED)
